@@ -36,31 +36,36 @@ def find_buzz_exe():
 
 BUZZ_EXE = find_buzz_exe()
 
-ALL_AGENTS = {
-    'Marketing Orchestrator': '9612286f19ecd7692958e7eda8fc449535b3a7076ef45ca17a8bd40ed9ce8e87',
-    'troly': 'fbc48fb951751d9c2e93b741d3348e750ae7038e6b1e6d45f06e50af67dfd868',
-    'Strategy': '62568f1db283a647e7c720faf607295a97357a6ec071ef0e4c663729e1b8bc18',
-    'Content Planner': '8f417c9a9e5976b031872b598729051349f49e4f8b34487c81c0415328e0bbdc',
-    'Creative Studio': '56d445607f66dfdb55cc6630ae0bc9b14bbd2efc89b89432da61b9c3f94e8fdc',
-    'Organic & Social': 'f0e1d0f7e352eda2a923a0feef4d54febe96fc4299505ffa7215733a1b8d570c',
-    'Paid Media': '0986bbed13eb29118a0c0bcb556387349b9ca602e7abb600e3d33f98c066e516',
-    'SEO & Web': '5a6b7b3846dbcf6e4ef005d37f0a8e55358cc021ed46d51b0f4568afa2c0905b',
-    'CRM & Lifecycle': '4d18dbc5012b45f393094de14c6a4e00c455980068fc7501b9c005df102707d6',
-    'Sales Enablement': 'd3d7d68286381204095d82b9a679a41465a8a905db0fc1a605080cfe70623982',
-    'Research Intelligence': 'e34370d056e62eb48eb3cb95696649ad1ea65e72a648513842e51958bcb97ff8',
-    'Analytics & Finance': '7f356c7eadbb1e853a3947cc11d730a14b46bc09af1ff7429d0ab41caaf7cbd3',
-    'Agent Chuẩn hóa & Lọc trùng Data': 'd8bc8636ace9cb8b0483be42d8ec78efa6b979a9a3d0365c15d1c9427303674b',
-    'Agent Tìm nguồn & Trích xuất Data XNK': 'b57b0adb1f7f461be3b474928f9aa536782603e407de0b004b25c0eb153aa51c',
-    'Agent Tra cứu & Xác minh Doanh nghiệp': '0913ce741b5b74b29902654a2e79ee197ee93ba1acedfa50e7d975286c3aa64c',
-    'Agent Tìm Contact & Enrichment': '255ead75dbad39dff087ba014bfc3247eaace4a154a29974e85ee3835c78f6df',
-    'Agent Xác định Mã ngành Doanh nghiệp': '38a8192d237d1d6e642b67408e81267a0d8440f4f4b18e3ee193c240337d8798',
-    'Agent QA & Chuẩn hóa Zoho': '922fbe242bad87a10abf69ad8918f7ead98da59b98ba9ebd9dfe8da7bdada251',
-    'Codex': 'c79afda34d456e5edce75541ba667c678edbf79821830c8c34c7a1104f48d4c0',
-    'Antigravity': '0b2268679f02be7572455ac9b33d5004b1a07c3e4d0af90d662025040aa5ae47',
-    'Fizz': '2714e397fc64f94621ba9748433be262030eb28203f7dd55fd20239f8aaf38b1',
-    'Honey': '41b0acba0bc5c086041d793f832e6d0ce83e34feab409455e06d8b06ba80d6ef',
-    'Pollen': '4a70084bb656b6b42b88e7495d0d6a21117401c80e9ce5d5944faaed02d219e4'
-}
+try:
+    from setup_managed_agents import CANONICAL_AGENTS
+    ALL_AGENTS = {a["name"]: a["pubkey"] for a in CANONICAL_AGENTS}
+except Exception:
+    ALL_AGENTS = {
+        'Marketing Orchestrator': '9612286f19ecd7692958e7eda8fc449535b3a7076ef45ca17a8bd40ed9ce8e87',
+        'troly': 'fbc48fb951751d9c2e93b741d3348e750ae7038e6b1e6d45f06e50af67dfd868',
+        'CRM & Lifecycle': '4d18dbc5012b45f393094de14c6a4e00c455980068fc7501b9c005df102707d6',
+        'Strategy': '62568f1db283a647e7c720faf607295a97357a6ec071ef0e4c663729e1b8bc18',
+        'Content Planner': 'bf250ae8cb21cec27023b9b7f5c57b93ca9837cbb031b908fdf689eae1c77529',
+        'Creative Studio': '56d445607f66dfdb55cc6630ae0bc9b14bbd2efc89b89432da61b9c3f94e8fdc',
+        'Organic & Social': 'f0e1d0f7e352eda2a923a0feef4d54febe96fc4299505ffa7215733a1b8d570c',
+        'Paid Media': '0986bbed13eb29118a0c0bcb556387349b9ca602e7abb600e3d33f98c066e516',
+        'SEO & Web': '5a6b7b3846dbcf6e4ef005d37f0a8e55358cc021ed46d51b0f4568afa2c0905b',
+        'Sales Enablement': 'd3d7d68286381204095d82b9a679a41465a8a905db0fc1a605080cfe70623982',
+        'Research Intelligence': 'e34370d056e62eb48eb3cb95696649ad1ea65e72a648513842e51958bcb97ff8',
+        'Analytics & Finance': '6f8a3cb68179ac894338fc3acf034e4f6a71c69b9ea76d44a89cdf56f659e6ba',
+        'Agent Chuẩn hóa & Lọc trùng Data': 'd8bc8636ace9cb8b0483be42d8ec78efa6b979a9a3d0365c15d1c9427303674b',
+        'Agent Tìm nguồn & Trích xuất Data XNK': 'b57b0adb1f7f461be3b474928f9aa536782603e407de0b004b25c0eb153aa51c',
+        'Agent Tra cứu & Xác minh Doanh nghiệp': '0913ce741b5b74b29902654a2e79ee197ee93ba1acedfa50e7d975286c3aa64c',
+        'Agent Tìm Contact & Enrichment': '255ead75dbad39dff087ba014bfc3247eaace4a154a29974e85ee3835c78f6df',
+        'Agent Xác định Mã ngành Minh Vân': '38a8192d237d1d6e642b67408e81267a0d8440f4f4b18e3ee193c240337d8798',
+        'Agent QA & Chuẩn hóa Zoho': '922fbe242bad87a10abf69ad8918f7ead98da59b98ba9ebd9dfe8da7bdada251',
+        'Codex': 'ea5c006f1e52fa961ea87f53d672711976f9d4b337bb9a3e14d2bcb38354be5e',
+        'Antigravity': '0d512a646ed4a4895c04fb219ebfc59d56bb15ab2ff9544008e8cb7e267df2ad',
+        'Fizz': '3fbf5c377579e6d887043f2a86c24ec3572e23169960150059227b5a69a2afd3',
+        'Honey': '6e321a91c08fb88c9887fdc906840604f4796bb8b6b3aeb56fc3978f90c9dfa7',
+        'Pollen': 'fc7273670c135caf3e43e9ff41fae77c64ca757fb6270854fbd4817800b4cbe5'
+    }
+
 
 ASSIGNMENTS = {
     '01-strategy': ['Strategy', 'Research Intelligence'],

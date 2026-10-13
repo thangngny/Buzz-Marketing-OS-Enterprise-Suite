@@ -10,7 +10,9 @@
     "namePool": [],
     "idleTimeoutSeconds": null,
     "maxTurnDurationSeconds": null,
-    "sourceIsBuiltin": false
+    "sourceIsBuiltin": false,
+    "respond_to": "anyone",
+    "respond_to_allowlist": []
   },
   "profile": {
     "displayName": "Chỉ Huy Trưởng Marketing (Orchestrator)",

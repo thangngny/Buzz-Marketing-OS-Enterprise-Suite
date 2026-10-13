@@ -312,6 +312,9 @@ def setup_managed_agents(company="Minh Văn Logistics", industry="Logistics & Ch
             target["turn_timeout_seconds"] = 320
             target["is_active"] = True
             target["respond_to"] = "anyone"
+            target["respondTo"] = "anyone"
+            target["respond_to_allowlist"] = []
+            target["respondToAllowlist"] = []
             if not target.get("pubkey"):
                 target["pubkey"] = pubkey
             if not target.get("private_key_nsec"):
@@ -358,7 +361,9 @@ def setup_managed_agents(company="Minh Văn Logistics", industry="Logistics & Ch
                 "last_error": None,
                 "last_error_code": None,
                 "respond_to": "anyone",
+                "respondTo": "anyone",
                 "respond_to_allowlist": [],
+                "respondToAllowlist": [],
                 "display_name": disp_name,
                 "description": role,
                 "slug": f"agent-{pubkey[:8]}",

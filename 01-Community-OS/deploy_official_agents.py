@@ -167,16 +167,45 @@ def build_nostr_event(privkey_bytes, kind, content, tags=None, created_at=None):
         "sig": sig
     }
 
-def build_nip98_header(privkey_bytes, url, method="POST"):
+def build_nip98_header(privkey_bytes, url, method="POST", payload_bytes=b""):
     import base64
+    import uuid
+    tags = [["u", url], ["method", method.upper()]]
+    if payload_bytes:
+        tags.append(["payload", hashlib.sha256(payload_bytes).hexdigest()])
+    tags.append(["nonce", str(uuid.uuid4())])
     event = build_nostr_event(
         privkey_bytes=privkey_bytes,
         kind=27235,
         content="",
-        tags=[["u", url], ["method", method.upper()]]
+        tags=tags
     )
     b64 = base64.b64encode(json.dumps(event, separators=(',', ':')).encode('utf-8')).decode('utf-8')
     return f"Nostr {b64}"
+
+def publish_agent_profile(http_base, agent_meta, privkey_bytes):
+    """
+    Phát sóng Nostr Kind 0 profile event lên Relay: POST /events kèm NIP-98 Auth
+    """
+    events_url = f"{http_base}/events"
+    profile_content = json.dumps({
+        "name": agent_meta["name"],
+        "display_name": agent_meta["display_name"],
+        "about": agent_meta["role"],
+        "picture": f"https://api.dicebear.com/7.x/bottts/svg?seed={agent_meta['name']}"
+    }, ensure_ascii=False)
+
+    event = build_nostr_event(
+        privkey_bytes=privkey_bytes,
+        kind=0,
+        content=profile_content,
+        tags=[]
+    )
+    event_bytes = json.dumps(event, separators=(',', ':'), ensure_ascii=False).encode('utf-8')
+    auth_header = build_nip98_header(privkey_bytes, events_url, "POST", payload_bytes=event_bytes)
+    res = http_json_request(events_url, "POST", event, {"Authorization": auth_header})
+    return res
+
 
 # ==============================================================================
 # CANONICAL 23 AGENTS DEFINITIONS WITH REAL VALID KEYS
@@ -278,6 +307,25 @@ def main():
         print("-" * 80)
     else:
         print("[!] Không truyền --invite: Bỏ qua bước claim API Relay (Sử dụng quyền đã cấp sẵn).")
+
+    # 2.5 Phát sóng Kind 0 Profile lên Relay
+    if not args.skip_claim:
+        print(f"[*] Đang phát sóng hồ sơ chính thức (Kind 0 Profile) của 23 Agent lên Relay...")
+        prof_count = 0
+        for idx, ag in enumerate(CANONICAL_AGENTS, 1):
+            try:
+                priv_bytes = nsec_to_bytes(ag["nsec"])
+                res = publish_agent_profile(http_relay, ag, priv_bytes)
+                if isinstance(res, dict) and res.get("error"):
+                    err_msg = res.get("message", res)
+                    print(f"  [WARN] [{idx:02d}/{len(CANONICAL_AGENTS):02d}] {ag['name'].ljust(35)} -> {err_msg}")
+                else:
+                    prof_count += 1
+                    print(f"  [OK]   [{idx:02d}/{len(CANONICAL_AGENTS):02d}] {ag['name'].ljust(35)} -> Đã phát sóng Profile")
+            except Exception as e:
+                print(f"  [WARN] [{idx:02d}/{len(CANONICAL_AGENTS):02d}] {ag['name'].ljust(35)} -> {e}")
+        print(f"[*] Hoàn tất phát sóng Profile: {prof_count}/{len(CANONICAL_AGENTS)} Agent.")
+        print("-" * 80)
 
     # 3. Nạp vào cấu hình Buzz Desktop (managed-agents.json)
     print("[*] Đang ghi nhận toàn bộ 23 Chuyên gia AI vào cấu hình máy tính...")
