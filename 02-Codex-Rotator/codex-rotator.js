@@ -158,6 +158,17 @@ function getStatus() {
   });
 }
 
+function hasHealthyAccounts() {
+  const baseAccounts = getAvailableBaseAccounts();
+  const baseProfiles = baseAccounts.filter(name => fs.existsSync(path.join(PROFILES_DIR, name, 'auth.json')));
+  if (baseProfiles.length === 0) return false;
+  const state = loadState();
+  cleanExpiredCooldowns(state);
+  const now = Date.now();
+  const healthy = baseProfiles.filter(p => !state.cooldowns || !state.cooldowns[p] || now >= state.cooldowns[p]);
+  return healthy.length > 0;
+}
+
 module.exports = {
   PROFILES_DIR,
   DEFAULT_BASE_ACCOUNTS,
@@ -167,5 +178,7 @@ module.exports = {
   getProfileHome,
   markCooldown,
   removeCooldown,
-  getStatus
+  getStatus,
+  loadState,
+  hasHealthyAccounts
 };

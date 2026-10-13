@@ -127,13 +127,94 @@ rl.on('line', (line) => {
   }
 });
 
+let failoverTriggered = false;
+
+function checkQuotaDepleted(text) {
+  if (!text) return false;
+  return (
+    text.includes('usageLimitExceeded') ||
+    text.includes('usage_limit_exceeded') ||
+    text.includes('workspace_member_credits_depleted') ||
+    text.includes('Your workspace is out of credits') ||
+    text.includes('rate_limit_reached_type')
+  );
+}
+
+function scanLatestSessionForQuotaError(dir) {
+  try {
+    const sessionsDir = path.join(dir, 'sessions');
+    if (!fs.existsSync(sessionsDir)) return false;
+    const now = new Date();
+    const y = String(now.getFullYear());
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const dayDir = path.join(sessionsDir, y, m, d);
+    if (!fs.existsSync(dayDir)) return false;
+    const files = fs.readdirSync(dayDir).filter(f => f.endsWith('.jsonl')).map(f => path.join(dayDir, f));
+    if (files.length === 0) return false;
+    files.sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
+    const latestFile = files[0];
+    const stat = fs.statSync(latestFile);
+    if (Date.now() - stat.mtimeMs < 180000) {
+      const content = fs.readFileSync(latestFile, 'utf8');
+      const tail = content.slice(-8192);
+      return checkQuotaDepleted(tail);
+    }
+  } catch (e) {}
+  return false;
+}
+
+function handleQuotaDepletion(sourceText) {
+  if (failoverTriggered) return;
+  failoverTriggered = true;
+
+  logDebug('QUOTA_DEPLETED_DETECTED', { profile: chosenProfile, preview: (sourceText || '').slice(0, 200) });
+
+  if (rotator && typeof rotator.markCooldown === 'function') {
+    rotator.markCooldown(chosenProfile, 300); // 300 minutes = 5 hours
+  }
+
+  const canFailover = rotator && typeof rotator.hasHealthyAccounts === 'function'
+    ? rotator.hasHealthyAccounts()
+    : true;
+
+  if (canFailover) {
+    logDebug('FAILOVER_ACTION', {
+      action: 'EXIT_FOR_BUZZ_RESPAWN',
+      profileExhausted: chosenProfile,
+      message: 'Terminating agent process so buzz-acp requeues and respawns on next healthy account.'
+    });
+    try {
+      child.kill();
+    } catch (e) {}
+    process.exit(1);
+  } else {
+    logDebug('ALL_ACCOUNTS_EXHAUSTED', {
+      profileExhausted: chosenProfile,
+      message: 'All accounts in pool have exhausted quota. Allowing error to propagate to channel.'
+    });
+  }
+}
+
 child.stdout.on('data', (chunk) => {
   process.stdout.write(chunk);
+  const str = chunk.toString();
+  if (checkQuotaDepleted(str)) {
+    handleQuotaDepletion(str);
+  }
 });
 
 child.stderr.on('data', (chunk) => {
   process.stderr.write(chunk);
-  logDebug('STDERR', chunk.toString());
+  const str = chunk.toString();
+  logDebug('STDERR', str);
+  if (checkQuotaDepleted(str)) {
+    handleQuotaDepletion(str);
+  } else if (str.includes('RequestError: Internal error')) {
+    if (scanLatestSessionForQuotaError(profileHome)) {
+      handleQuotaDepletion('scanLatestSessionForQuotaError: detected quota error in session rollout');
+    }
+  }
 });
 
 child.on('exit', (code) => {
