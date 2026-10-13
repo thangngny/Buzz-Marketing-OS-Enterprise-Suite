@@ -35,6 +35,11 @@ def deploy_layer_1(community_url=None, nsec=None):
     print("\n" + "=" * 80)
     print(">>> TIẾN TRÌNH 1: TRIỂN KHAI TẦNG 1 (KHUNG PHÒNG BAN & AGENT NOSTR)")
     print("=" * 80)
+    # Bước 1.1: Đồng bộ Agents & Teams vào ứng dụng Buzz Desktop cục bộ
+    setup_agents_script = SUITE_ROOT / "01-Community-OS" / "setup_managed_agents.py"
+    run_script(setup_agents_script)
+
+    # Bước 1.2: Xây dựng Kênh phòng ban & Phân quyền trên Community Relay
     injector_script = SUITE_ROOT / "01-Community-OS" / "inject_framework.py"
     cmd_args = []
     if community_url:

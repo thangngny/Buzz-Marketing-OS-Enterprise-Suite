@@ -74,11 +74,16 @@ python 03-Marketing-Hub/setup_hub.py
   * Khởi tạo `.env` từ `.env.example` (chế độ an toàn `mock/dry-run`).
   * Đăng ký Harness `marketing-hub.json` vào Buzz Desktop.
 
-#### Bước 3: Triển khai Tầng 1 - Bơm Khung 28 Kênh & 25 Agent
+#### Bước 3: Triển khai Tầng 1 - Đồng bộ Agent vào Buzz & Bơm Khung Community
 ```bash
+# Đồng bộ Agent vào ứng dụng Buzz Desktop cục bộ (managed-agents.json & templates)
+python 01-Community-OS/setup_managed_agents.py
+
+# Xây dựng kênh và phân quyền bot trên Community Relay
 python 01-Community-OS/inject_framework.py --url "<COMMUNITY_URL>" --nsec "<OWNER_NSEC>"
 ```
 * **Nhiệm vụ tự động hoàn thành:**
+  * Nạp trực tiếp 23 Agent chuyên gia vào `%APPDATA%\xyz.block.buzz.app\agents\managed-agents.json` và `teams.json`.
   * Kết nối WebSocket WSS vào Relay của Community.
   * Ký Nostr Kind 40 tạo 28 phòng ban chuẩn hóa.
   * Ký Nostr Kind 0 khởi tạo 25 nhân sự AI chuẩn tên chuyên nghiệp.
@@ -94,13 +99,13 @@ python verify_system.py
 
 ## 4. HƯỚNG DẪN NGƯỜI DÙNG THỰC THI CÁC BƯỚC GIAO DIỆN (UI STEPS)
 
-Sau khi hoàn thành phần lệnh chạy ngầm, Agent hãy hướng dẫn người dùng thực hiện 2 thao tác trên giao diện:
+Sau khi hoàn thành phần lệnh chạy ngầm, toàn bộ Agent đã tự động hiện diện trong Buzz Desktop. Người dùng chỉ cần:
 
-### A. Nhập Team Snapshot vào Buzz Desktop (10 giây)
+### A. Nhập Team Snapshot vào Buzz Desktop (Nếu muốn import thủ công qua UI)
 1. Mở ứng dụng **Buzz Desktop**.
-2. Chọn menu **Teams** (hoặc biểu tượng Tổ chức) -> Chọn **Import Team Snapshot**.
-3. Chọn tệp: `01-Community-OS/Marketing-OS-Full.team.json`.
-4. Bấm **Import**: Toàn bộ danh tính, avatar, SOP và phân quyền của 25 Agent sẽ xuất hiện trên ứng dụng.
+2. **Nhập cả Đội ngũ:** Chọn **Teams** -> **Import Team Snapshot** -> Chọn `01-Community-OS/Marketing-OS-Full.team.json` (hoặc `Marketing-OS-NCTHANG04.team.json`).
+3. **Nhập lẻ từng Agent:** Chọn **Agents** -> **Import Agent** -> Chọn bất kỳ file nào trong thư mục `01-Community-OS/individual-agents/`.
+4. ⚠️ **Lưu ý:** Không chọn file `agents_template.json` trong giao diện UI vì đó là file code template mảng thô.
 
 ### B. Đăng nhập tài khoản ChatGPT / Codex (Nếu dùng nhiều tài khoản xoay tua)
 1. Chạy file: `02-Codex-Rotator/Quan-Ly-Tai-Khoan.bat` (hoặc `node 02-Codex-Rotator/account-manager.js`).

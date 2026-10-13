@@ -161,8 +161,11 @@ def setup_team_snapshot(base_dir, company_name, industry):
     with open(template_path, "r", encoding="utf-8") as f:
         data_str = f.read()
 
+    data_str = data_str.replace(r"\buzz-export", "buzz-export").replace(r"\browser", "browser")
     data_str = data_str.replace("{{COMPANY_NAME}}", company_name)
     data_str = data_str.replace("{{INDUSTRY}}", industry)
+    data_str = data_str.replace("{{FANPAGE_ID}}", "1181525411706512")
+    data_str = data_str.replace("{{BRAND_HANDLE}}", "minhvanlogistics")
 
     output_team = os.path.join(base_dir, f"Marketing-OS-{company_name}.team.json")
     with open(output_team, "w", encoding="utf-8") as f:
@@ -174,13 +177,13 @@ def setup_team_snapshot(base_dir, company_name, industry):
     appdata = os.environ.get("APPDATA")
     if appdata:
         buzz_templates = os.path.join(appdata, "xyz.block.buzz.app", "templates")
-        if os.path.exists(buzz_templates):
+        try:
+            os.makedirs(buzz_templates, exist_ok=True)
             dest = os.path.join(buzz_templates, f"Marketing-OS-{company_name}.team.json")
-            try:
-                shutil.copyfile(output_team, dest)
-                print(f"[OK] Đã tự động nạp mẫu đội ngũ vào ứng dụng Buzz Desktop: {dest}")
-            except Exception as e:
-                pass
+            shutil.copyfile(output_team, dest)
+            print(f"[OK] Đã tự động nạp mẫu đội ngũ vào ứng dụng Buzz Desktop: {dest}")
+        except Exception as e:
+            pass
 
 def assign_agents_to_channels(relay, private_key, channel_id_map):
     print("\n" + "="*60)

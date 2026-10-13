@@ -40,14 +40,21 @@ Coding Agent trên máy đó sẽ:
 
 ## 🛠️ NẾU ANH MUỐN TỰ BẤM CHUỘT CÀI ĐẶT:
 
-Nếu không dùng Agent, anh chỉ cần thực hiện 3 bước đơn giản:
+Nếu không dùng Agent, anh chỉ cần thực hiện các bước cực kỳ đơn giản:
 
 1. **Bấm đúp file `Cai-Dat-Tong-Luc.bat`**:
    * Nhập số `[1]` để chọn cài đặt toàn bộ.
-   * Nhập Link Community và Mã khóa `nsec` khi được hỏi.
-2. **Nhập Team vào Buzz Desktop**:
-   * Mở Buzz Desktop -> Vào mục **Teams** -> Bấm **Import Team Snapshot**.
-   * Chọn file: `01-Community-OS/Marketing-OS-Full.team.json`.
+   * Hệ thống sẽ **tự động nạp toàn bộ 23 Agent & Đội ngũ vào Buzz Desktop** (`managed-agents.json`), anh không cần phải bấm import thủ công nữa!
+
+2. **(Tùy chọn) Nếu anh muốn tự bấm Import trên giao diện Buzz Desktop**:
+   * **Nhập toàn bộ Đội ngũ (Khuyên dùng):**
+     - Mở Buzz Desktop -> Vào mục **Teams** -> Bấm **Import Team Snapshot**.
+     - Chọn file: `01-Community-OS/Marketing-OS-Full.team.json` (hoặc `Marketing-OS-NCTHANG04.team.json`).
+   * **Nhập lẻ từng Agent:**
+     - Mở Buzz Desktop -> Vào mục **Agents** -> Bấm **Import Agent**.
+     - Chọn file tương ứng trong thư mục: `01-Community-OS/individual-agents/` (đã có đủ 23 file `.agent.json` chuẩn).
+   * ⚠️ **LƯU Ý:** Tuyệt đối **KHÔNG** chọn file `agents_template.json` trên giao diện Buzz UI, vì đó là file mảng dữ liệu code thô, Buzz Desktop sẽ báo lỗi sai định dạng.
+
 3. **Đăng nhập tài khoản ChatGPT (Nếu dùng bộ xoay nhiều tài khoản)**:
    * Chạy file: `02-Codex-Rotator/Quan-Ly-Tai-Khoan.bat` để đăng nhập 1 đến 3 tài khoản.
 
