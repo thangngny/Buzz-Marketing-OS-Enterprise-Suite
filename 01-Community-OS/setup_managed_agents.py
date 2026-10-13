@@ -23,13 +23,13 @@ if sys.platform == "win32":
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 
-# Danh sách 23 Chuyên gia AI chuẩn kèm Private Key nsec & Pubkey chính thức
+# Danh sách 23 Chuyên gia AI chuẩn kèm Private Key nsec & Pubkey chính thức 100% hợp lệ
 CANONICAL_AGENTS = [
     {
         "name": "Marketing Orchestrator",
         "display_name": "Chỉ Huy Trưởng Marketing (Orchestrator)",
         "pubkey": "9612286f19ecd7692958e7eda8fc449535b3a7076ef45ca17a8bd40ed9ce8e87",
-        "nsec": "nsec1uh0kuhc89n823j2q8u94m42dgyj376x034j7z2f447q3f3k7z2fsgjvh9z",
+        "nsec": "nsec1awesa7wtra693jtaqp85s7gte3d5v4uvh4q7u5dyk4r6r4t7l8qsvshdrl",
         "role": "Chỉ huy trưởng toàn diện hệ điều hành AI Marketing",
         "parallelism": 10
     },
@@ -37,7 +37,7 @@ CANONICAL_AGENTS = [
         "name": "troly",
         "display_name": "Trợ Lý Tổng Quản Điều Hành (Executive Assistant)",
         "pubkey": "fbc48fb951751d9c2e93b741d3348e750ae7038e6b1e6d45f06e50af67dfd868",
-        "nsec": "nsec1l9t8zrq3r8qg9v4x47d2v2u0m2d2v2u0m2d2v2u0m2d2v2u0m2d2v2u0m2d",
+        "nsec": "nsec15ssqugwfn7v98m6fnknmeccyqkdlhelqyhcfzg7anqmlfancmhaq5ampzr",
         "role": "Trợ lý điều hành cá nhân cho Ban Lãnh đạo",
         "parallelism": 10
     },
@@ -45,7 +45,7 @@ CANONICAL_AGENTS = [
         "name": "CRM & Lifecycle",
         "display_name": "Quản Lý Vòng Đời Khách Hàng (CRM & Lifecycle)",
         "pubkey": "4d18dbc5012b45f393094de14c6a4e00c455980068fc7501b9c005df102707d6",
-        "nsec": "nsec1w76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s7",
+        "nsec": "nsec1xxtv33qjr4tnp8pdlenvuqreny0vn7jmanqucxyqe280d8r0tu4s9zf5c8",
         "role": "Nuôi dưỡng khách hàng tiềm năng, Zoho CRM và phễu chuyển đổi",
         "parallelism": 10
     },
@@ -53,15 +53,15 @@ CANONICAL_AGENTS = [
         "name": "Strategy",
         "display_name": "Trưởng Phòng Chiến Lược (Strategy)",
         "pubkey": "62568f1db283a647e7c720faf607295a97357a6ec071ef0e4c663729e1b8bc18",
-        "nsec": "nsec1y2u0m2d2v2u0m2d2v2u0m2d2v2u0m2d2v2u0m2d2v2u0m2d2v2u0m2d2v2u",
+        "nsec": "nsec1qhw6fdtkvsuehrqgxlyhxae9dj0gveaka44fjzlj8vrft0gfwelq2ckj2a",
         "role": "Định vị thương hiệu, nghiên cứu đối thủ và chiến lược tăng trưởng",
         "parallelism": 10
     },
     {
         "name": "Content Planner",
         "display_name": "Trưởng Phòng Kế Hoạch Nội Dung (Content Planner)",
-        "pubkey": "8f417c9a9e598cb3d77926b47c47d7bbf11d1ebc905b6a7155ec173ce17f395f",
-        "nsec": "nsec1p76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s7",
+        "pubkey": "bf250ae8cb21cec27023b9b7f5c57b93ca9837cbb031b908fdf689eae1c77529",
+        "nsec": "nsec1tv8eyh3szh3zknpxllp797wfvetvh78n5n3q828qkal88uqc4s5sgdflua",
         "role": "Xây dựng lịch xuất bản đa kênh và dàn ý bài viết",
         "parallelism": 10
     },
@@ -69,7 +69,7 @@ CANONICAL_AGENTS = [
         "name": "Creative Studio",
         "display_name": "Giám Đốc Sáng Tạo & Đồ Họa (Creative Studio)",
         "pubkey": "56d445607f66dfdb55cc6630ae0bc9b14bbd2efc89b89432da61b9c3f94e8fdc",
-        "nsec": "nsec1q76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s7",
+        "nsec": "nsec1szjfsnch4kf2wml4ey3tscu50mugdwx4494nevrhth3cmhzhnkesc7sh3p",
         "role": "Sản xuất video HeyGen, thiết kế đồ họa Canva và kịch bản viral",
         "parallelism": 10
     },
@@ -77,7 +77,7 @@ CANONICAL_AGENTS = [
         "name": "Organic & Social",
         "display_name": "Chuyên Gia Mạng Xã Hội (Social Media)",
         "pubkey": "f0e1d0f7e352eda2a923a0feef4d54febe96fc4299505ffa7215733a1b8d570c",
-        "nsec": "nsec1r76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s7",
+        "nsec": "nsec1f3y6grvqrk8qd438zas899f0cren2n0y5wk64f5g9w0kggtrn72sn6n5ef",
         "role": "Vận hành phân phối nội dung Facebook, TikTok, LinkedIn",
         "parallelism": 10
     },
@@ -85,7 +85,7 @@ CANONICAL_AGENTS = [
         "name": "Paid Media",
         "display_name": "Chuyên Gia Quảng Cáo Số (Paid Media)",
         "pubkey": "0986bbed13eb29118a0c0bcb556387349b9ca602e7abb600e3d33f98c066e516",
-        "nsec": "nsec1s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s7",
+        "nsec": "nsec1hcxcuxnqf5l0900ggtkjf29c5dqljjjz08vszm36pwhzlydhx3zq34q60y",
         "role": "Tối ưu hóa chiến dịch quảng cáo Facebook Ads, Google Ads",
         "parallelism": 10
     },
@@ -93,7 +93,7 @@ CANONICAL_AGENTS = [
         "name": "SEO & Web",
         "display_name": "Chuyên Gia SEO & Website (SEO & Web)",
         "pubkey": "5a6b7b3846dbcf6e4ef005d37f0a8e55358cc021ed46d51b0f4568afa2c0905b",
-        "nsec": "nsec1t76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s7",
+        "nsec": "nsec10exzt29dmz5nxfrvn8tsmcns8flg3pm6e5vgrevhrddt2und9vqqj3nmge",
         "role": "Tối ưu hóa công cụ tìm kiếm và cấu trúc website doanh nghiệp",
         "parallelism": 10
     },
@@ -101,15 +101,15 @@ CANONICAL_AGENTS = [
         "name": "Sales Enablement",
         "display_name": "Chuyên Gia Hỗ Trợ Bán Hàng (Sales Enablement)",
         "pubkey": "d3d7d68286381204095d82b9a679a41465a8a905db0fc1a605080cfe70623982",
-        "nsec": "nsec1u76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s7",
+        "nsec": "nsec189054ynvl8hfrk6d3zvd7daudlj2zlwxcer7nkm3aqeau5pp8css8satds",
         "role": "Tài liệu bán hàng, kịch bản chốt deal và cẩm nang đào tạo Sales",
         "parallelism": 10
     },
     {
         "name": "Analytics & Finance",
         "display_name": "Chuyên Gia Dữ Liệu & Ngân Sách (Analytics & Finance)",
-        "pubkey": "7f356c7eadbbd5b128c772cbdf0702d73f4e3c1a2d5e6f7a8b9c0d1e2f3a4b5c",
-        "nsec": "nsec1v76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s7",
+        "pubkey": "6f8a3cb68179ac894338fc3acf034e4f6a71c69b9ea76d44a89cdf56f659e6ba",
+        "nsec": "nsec1evg7quxkcwdq5gd8vgadgj7twdak8y0m3w35ffecn9jpasxdjydq3j8386",
         "role": "Đo lường hiệu quả chuyển đổi, ROI tiếp thị và kiểm soát ngân sách",
         "parallelism": 10
     },
@@ -117,23 +117,23 @@ CANONICAL_AGENTS = [
         "name": "Research Intelligence",
         "display_name": "Chuyên Gia Nghiên Cứu Thị Trường (Research)",
         "pubkey": "e34370d056e62eb48eb3cb95696649ad1ea65e72a648513842e51958bcb97ff8",
-        "nsec": "nsec1w87s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s7",
+        "nsec": "nsec1grqzxgqmxc3velwst9gx2aadfqms5m2c9pxrptq3qgydkuqnu5vqtkseqh",
         "role": "Thu thập tin tức ngành, xu hướng tiêu dùng và dữ liệu cạnh tranh",
         "parallelism": 10
     },
     {
         "name": "Antigravity",
         "display_name": "Kỹ Sư Lập Trình Hệ Thống AI (Antigravity)",
-        "pubkey": "0b2268679f02c61bf70451cfbfbe91a1df277860144f8615b3c8f85f385c54b3",
-        "nsec": "nsec1x76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s7",
+        "pubkey": "0d512a646ed4a4895c04fb219ebfc59d56bb15ab2ff9544008e8cb7e267df2ad",
+        "nsec": "nsec1zwvuck3fue3hcaej80h9hvmk3jl359mjcs6w2z8ujld48r2t2fsqzyh8yc",
         "role": "Lập trình giải pháp tự động hóa sâu, script điều phối và tích hợp API",
         "parallelism": 10
     },
     {
         "name": "Codex",
         "display_name": "Kỹ Sư Kỹ Thuật & Tự Động Hóa (Codex)",
-        "pubkey": "c79afda34d45ffca5f29d20c2d334585ab5689b2512c019918bc25828114f4e1",
-        "nsec": "nsec1y76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s7",
+        "pubkey": "ea5c006f1e52fa961ea87f53d672711976f9d4b337bb9a3e14d2bcb38354be5e",
+        "nsec": "nsec1tlxywtc0xfxzl95q0qgqx2ex922x8pmhtams907cmqm43rmd909qs5z4g7",
         "role": "Kỹ sư runtime và thực thi lệnh máy chủ chuyên dụng",
         "parallelism": 10
     },
@@ -149,7 +149,7 @@ CANONICAL_AGENTS = [
         "name": "Agent Tìm nguồn & Trích xuất Data XNK",
         "display_name": "Chuyên Viên Khai Thác Dữ Liệu Thị Trường (Data Extraction)",
         "pubkey": "b57b0adb1f7f461be3b474928f9aa536782603e407de0b004b25c0eb153aa51c",
-        "nsec": "nsec1y9t8zrq3r8qg9v4x47d2v2u0m2d2v2u0m2d2v2u0m2d2v2u0m2d2v2u0m2x",
+        "nsec": "nsec1np0u8yjqe42g0g6a74ntceddj3fp64k6c83v2ur7n8kj5mc7a2asvhfa0n",
         "role": "Trích xuất hồ sơ thị trường từ nguồn mở và tài liệu ngành",
         "parallelism": 2
     },
@@ -157,7 +157,7 @@ CANONICAL_AGENTS = [
         "name": "Agent Tra cứu & Xác minh Doanh nghiệp",
         "display_name": "Chuyên Viên Xác Minh Doanh Nghiệp (Data Verify)",
         "pubkey": "0913ce741b5b74b29902654a2e79ee197ee93ba1acedfa50e7d975286c3aa64c",
-        "nsec": "nsec1z76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s7",
+        "nsec": "nsec1tpa244t5zlj5vdf8usung908ldsza5g9fvu4rvsmpd0tgzwwqnaqr95js8",
         "role": "Đối chiếu mã số thuế và tư cách pháp nhân trên cổng thông tin",
         "parallelism": 2
     },
@@ -165,7 +165,7 @@ CANONICAL_AGENTS = [
         "name": "Agent Tìm Contact & Enrichment",
         "display_name": "Chuyên Viên Làm Giàu Dữ Liệu Liên Hệ (Contact Enrichment)",
         "pubkey": "255ead75dbad39dff087ba014bfc3247eaace4a154a29974e85ee3835c78f6df",
-        "nsec": "nsec1a76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s7",
+        "nsec": "nsec1cwlxv6dd5tf2hkpn5s2mlt2dgdwz876700x0fm0rsffa7ekqwrasm24zje",
         "role": "Bổ sung số điện thoại, email và hồ sơ lãnh đạo doanh nghiệp",
         "parallelism": 2
     },
@@ -173,7 +173,7 @@ CANONICAL_AGENTS = [
         "name": "Agent Xác định Mã ngành Minh Vân",
         "display_name": "Chuyên Viên Phân Loại Ngành Nghề (Industry Classifier)",
         "pubkey": "38a8192d237d1d6e642b67408e81267a0d8440f4f4b18e3ee193c240337d8798",
-        "nsec": "nsec1b76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s7",
+        "nsec": "nsec14wtk70848uz4mqw6cp487avn44taw25zzrepfph4wns535j40upsatzam7",
         "role": "Phân loại mã HS và nhóm ngành mục tiêu cho đội Sales",
         "parallelism": 2
     },
@@ -181,35 +181,36 @@ CANONICAL_AGENTS = [
         "name": "Agent QA & Chuẩn hóa Zoho",
         "display_name": "Chuyên Viên Kiểm Định Chất Lượng CRM (Zoho QA)",
         "pubkey": "922fbe242bad87a10abf69ad8918f7ead98da59b98ba9ebd9dfe8da7bdada251",
-        "nsec": "nsec1c76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s7",
+        "nsec": "nsec14klp5aax02fu9h8vt4aedha7zvgctnqlazqu3nrtclu5hapmgnyqf5kue2",
         "role": "Kiểm tra chất lượng trường dữ liệu trước khi đẩy vào Zoho CRM",
         "parallelism": 2
     },
     {
         "name": "Fizz",
         "display_name": "Trợ Lý Tiếp Đón & Chào Mừng (Fizz)",
-        "pubkey": "2714e397fc64a51e605d8bc1b9136fe9f9f582c5f1064ff3f3a131b7e4f8d689",
-        "nsec": "nsec1d76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s7",
+        "pubkey": "3fbf5c377579e6d887043f2a86c24ec3572e23169960150059227b5a69a2afd3",
+        "nsec": "nsec1zl6cks0zajpcjhp7cecjcftwjhsdh60h5aspa75fxslupk8mwxaqanm2e9",
         "role": "Tiếp đón và chào mừng nhân sự vào không gian làm việc",
         "parallelism": 5
     },
     {
         "name": "Honey",
         "display_name": "Trợ Lý Chăm Sóc & Hỗ Trợ (Honey)",
-        "pubkey": "41b0acba0bc553755452fcf67bfd96d2b63897b0a880ec01fb0cbbe4c0d164ee",
-        "nsec": "nsec1e76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s7",
+        "pubkey": "6e321a91c08fb88c9887fdc906840604f4796bb8b6b3aeb56fc3978f90c9dfa7",
+        "nsec": "nsec1j9ehh70uuezqr6jzprrlj0j4rjs843uukhgvr0xna7e3ljsnl4kqax5plw",
         "role": "Hỗ trợ thành viên mới và cung cấp thông tin hướng dẫn",
         "parallelism": 5
     },
     {
         "name": "Pollen",
         "display_name": "Trợ Lý Hướng Dẫn Vận Hành (Pollen)",
-        "pubkey": "4a70084bb65636034176bc29b68eef0500be4eb3296c6fa8e9c20a8e945c2f82",
-        "nsec": "nsec1f76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s76s7",
+        "pubkey": "fc7273670c135caf3e43e9ff41fae77c64ca757fb6270854fbd4817800b4cbe5",
+        "nsec": "nsec1q95lstq2xe3g4yd4nyatetx4e568ay89nj6vwmemm9r8gn9qqr5qf37r7u",
         "role": "Chỉ dẫn điều hướng các phòng ban và quy trình vận hành",
         "parallelism": 5
     }
 ]
+
 
 def get_buzz_paths():
     appdata = os.environ.get("APPDATA")
