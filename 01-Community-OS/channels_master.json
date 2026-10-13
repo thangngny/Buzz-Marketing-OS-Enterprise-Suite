@@ -1,0 +1,106 @@
+[
+  {
+    "name": "00-command",
+    "description": "Kenh dieu hanh - noi chuyen truc tiep voi Hermes / Marketing Orchestrator. Lap ke hoach, kiem tra campaign, uu tien cong viec."
+  },
+  {
+    "name": "01-strategy",
+    "description": "Chien luoc: ICP, positioning, campaign, market, competitor, ke hoach thang/quy, KPI."
+  },
+  {
+    "name": "02-content",
+    "description": "Content pipeline: Idea - Research - Draft - Review - Approve - Publish."
+  },
+  {
+    "name": "03-campaign",
+    "description": "Dieu hanh campaign: bien muc tieu thanh checklist va workflow."
+  },
+  {
+    "name": "04-leads",
+    "description": "Apollo + CRM: Research - Enrichment - Scoring - CRM - Sales. Chi hien ket qua, khong do du lieu tho."
+  },
+  {
+    "name": "05-sales",
+    "description": "Cau noi Marketing - Sales: tin hieu tu CRM, briefing account cho doi sales."
+  },
+  {
+    "name": "06-kpi-learning",
+    "description": "Bao cao tu dong hang ngay: leads, qualified, meetings, RFQ, pipeline, learning, next experiment."
+  },
+  {
+    "name": "Assistant Marketing",
+    "description": "Kenh tro ly tong hop tin tuc, thong bao va bao cao tu tat ca cac phong ban ve mot noi."
+  },
+  {
+    "name": "Facebook post",
+    "description": "Tao bai viet, hinh anh va lich dang theo dung chien luoc noi dung cua Fanpage."
+  },
+  {
+    "name": "Facebook Content Ads",
+    "description": "Kich ban, tieu de va noi dung danh cho cac chien dich chay quang cao Facebook Ads."
+  },
+  {
+    "name": "Facebook ads",
+    "description": "Dieu hanh, thiet lap, do luong chi phi va toi uu cac chien dich quang cao Facebook Ads."
+  },
+  {
+    "name": "Tiktok",
+    "description": "San xuat kich ban video ngan, xu huong (trending) va video chuyen doi tren TikTok."
+  },
+  {
+    "name": "Youtube",
+    "description": "Kich ban video dai, huong dan su dung, review san pham va toi uu SEO YouTube."
+  },
+  {
+    "name": "Linkedin",
+    "description": "Xay dung thuong hieu doanh nghiep B2B, bai viet chuyen gia va ket noi doi tac tren LinkedIn."
+  },
+  {
+    "name": "Zalo OA",
+    "description": "Quan ly kenh Zalo Official Account, gui tin nhan cham soc va thong bao khach hang."
+  },
+  {
+    "name": "SEO & GEO Website",
+    "description": "Toi uu hoa cong cu tim kiem Google va cac cong cu tri tue nhan tao (AI Search) tren Website."
+  },
+  {
+    "name": "App + Landing page",
+    "description": "Thiet ke, viet noi dung va toi uu ty le chuyen doi cho Landing Page va ung dung."
+  },
+  {
+    "name": "Email",
+    "description": "Xay dung chuoi email marketing, ban tin dinh ky (newsletter) va nuoi duong khach hang."
+  },
+  {
+    "name": "Zoho",
+    "description": "He thong quan ly quan he khach hang CRM, du lieu lien he, hop dong va quy trinh ban hang."
+  },
+  {
+    "name": "Research",
+    "description": "Nghien cuu thi truong, phan tich doi thu canh tranh, hanh vi khach hang va xu huong moi."
+  },
+  {
+    "name": "Data",
+    "description": "Thu thap, lam sach, doi chieu va phan tich so lieu marketing va kinh doanh."
+  },
+  {
+    "name": "Tai chinh",
+    "description": "Quan ly ngan sach quang cao, chi phi cong cu AI va tinh toan hieu qua dau tu (ROI)."
+  },
+  {
+    "name": "Link tai lieu",
+    "description": "Kho luu tru tap trung cac file bao cao (PDF, Word, Excel, Video) de tai ve tren moi thiet bi."
+  },
+  {
+    "name": "welcome-everyone",
+    "description": "Kenh chao mung thanh vien moi gia nhap he thong va huong dan su dung co ban."
+  },
+  {
+    "name": "general",
+    "description": "Kenh trao doi, thao luan chung va thong bao noi bo cua toan cong ty."
+  },
+  {
+    "name": "test-agents",
+    "description": "Kenh danh rieng de kiem tra tinh nang, chay thu nghiem cac Agent truoc khi ap dung thuc te."
+  }
+]

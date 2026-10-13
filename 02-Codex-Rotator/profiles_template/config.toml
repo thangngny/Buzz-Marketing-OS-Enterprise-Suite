@@ -1,0 +1,4 @@
+# Cấu hình chuẩn cho tài khoản Codex trong hệ sinh thái Buzz Marketing
+model = "gpt-5.6-luna"
+approval_mode = "automatic"
+sandbox_mode = "read_write"

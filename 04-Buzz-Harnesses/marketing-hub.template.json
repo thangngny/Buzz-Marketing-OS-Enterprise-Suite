@@ -1,0 +1,9 @@
+{
+  "id": "marketing-hub",
+  "label": "Marketing System Hub (Zoho/Apollo/YouTube/Website)",
+  "installInstructionsUrl": "https://github.com/thangngny/marketing-ai-system",
+  "installHint": "already installed at {{REPO_DIR}}",
+  "command": "{{PYTHON_EXE}}",
+  "args": ["-m", "marketing_system.mcp_server"],
+  "env": {}
+}

@@ -1,0 +1,5 @@
+# DANH SÁCH COMMUNITY CẦN CÀI ĐẶT HÀNG LOẠT
+# Mỗi dòng ghi: <Link_Community> <Khóa_nsec>
+# Ví dụ:
+# https://congty1.communities.buzz.xyz nsec1xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# https://congty2.communities.buzz.xyz nsec1yyyyyyyyyyyyyyyyyyyyyyyyyyyy

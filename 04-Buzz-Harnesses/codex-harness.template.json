@@ -1,0 +1,11 @@
+{
+  "id": "codex-harness",
+  "label": "Codex ACP Rotating (Multi-Account)",
+  "installInstructionsUrl": "https://developers.openai.com/codex/cli/",
+  "installHint": "npm install -g @agentclientprotocol/codex-acp",
+  "command": "{{NODE_EXE}}",
+  "args": [
+    "{{ROTATOR_SCRIPT}}"
+  ],
+  "env": {}
+}

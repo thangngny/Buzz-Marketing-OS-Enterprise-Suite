@@ -1,0 +1,17 @@
+{
+  "id": "antigravity",
+  "label": "Antigravity (agy)",
+  "installInstructionsUrl": "https://github.com/sibbl/google-antigravity-acp",
+  "installHint": "npm install -g google-antigravity-acp",
+  "command": "{{NODE_EXE}}",
+  "args": [
+    "{{AGY_ACP_CLI}}",
+    "-b",
+    "{{AGY_BIN}}",
+    "-m",
+    "gemini-3.8-flash-high",
+    "-e",
+    "high"
+  ],
+  "env": {}
+}
