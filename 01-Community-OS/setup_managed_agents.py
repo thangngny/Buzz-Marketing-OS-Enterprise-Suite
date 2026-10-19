@@ -388,11 +388,21 @@ def setup_managed_agents(company=None, industry=None, fanpage_id=None, brand_han
             existing_by_name[name] = new_record
             added_count += 1
 
+    # Lọc sạch các bản ghi rác không có pubkey hoặc trùng lặp
+    cleaned_agents = []
+    seen_names = set()
+    for a in existing_agents:
+        pk = a.get("pubkey")
+        aname = a.get("name")
+        if pk and aname and aname not in seen_names:
+            seen_names.add(aname)
+            cleaned_agents.append(a)
+
     # Lưu lại file managed-agents.json
     with open(managed_json_path, "w", encoding="utf-8") as f:
-        json.dump(existing_agents, f, ensure_ascii=False, indent=2)
+        json.dump(cleaned_agents, f, ensure_ascii=False, indent=2)
 
-    print(f"[OK] Đã cập nhật {updated_count} và thêm mới {added_count} Agent trong {managed_json_path.name}.")
+    print(f"[OK] Đã chuẩn hóa chính xác {len(cleaned_agents)} Chuyên gia AI trong {managed_json_path.name}.")
 
     # 4. Cập nhật file teams.json để hiển thị đội ngũ trong giao diện Teams
     teams_json_path = agents_dir / "teams.json"
