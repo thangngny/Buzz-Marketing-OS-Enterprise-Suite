@@ -137,16 +137,27 @@ Tiêu chuẩn bàn giao hoàn hảo: **6/6 TESTS PASS**.
 
 ---
 
-## 5. TẦNG 1: BUZZ COMMUNITY & CƠ CHẾ ACCESS POLICY
+## 5. TẦNG 1: BUZZ COMMUNITY, BUZZ CLI & XỬ LÝ LỖI PHÂN QUYỀN (ACCESS POLICY)
 
-1. **Khắc phục lỗi người mới vào không tag được Agent (Root Cause & Solution)**:
-   - Khi Agent được tạo trên Buzz, cần 3 điều kiện đồng bộ để mọi thành viên đều tag được:
-     1. Thuộc tính `respond_to: "anyone"` trong `managed-agents.json`.
-     2. Sự kiện Nostr **Kind 10100** (Access Policy: `anyone`) được phát sóng lên Community Relay.
-     3. Khóa NIP-98 của từng Agent được gia nhập Relay Membership (để vượt qua cổng 403 Forbidden).
-   - Tất cả đã được tự động hóa trong:
-     - `01-Community-OS/broadcast_kind_10100.js`
-     - `01-Community-OS/deploy_official_agents.py`
+### 1. Khắc phục lỗi "Could not authorize a mentioned agent" / "Agent; owner unavailable"
+- **Hiện tượng**: Tài khoản Owner gọi bot bình thường, nhưng thành viên khác tag bot thì bị báo lỗi chặn quyền, dưới tên bot hiện *"Agent; owner unavailable"*, nút gửi tin nhắn bị khóa.
+- **Nguyên nhân gốc rễ**: 
+  1. Thiếu thuộc tính `respond_to: "anyone"` và `definition_respond_to: "anyone"` trong `managed-agents.json`.
+  2. Sự kiện Nostr **Kind 10100** (Access Policy: `anyone`) chưa được ký và phát sóng lên Relay.
+  3. Daemon `buzz-acp` thiếu 2 cờ bắt buộc: `--permission-mode bypass-permissions` và `--respond-to anyone`.
+  4. Cấu hình LLM Runner chưa tắt chế độ chờ duyệt (`approval_policy = "never"`).
+- **Cách tự động sửa dứt điểm trong 1 lệnh (Self-Healing)**:
+  ```bash
+  python 01-Community-OS/fix_agent_permissions.py
+  ```
+  Script sẽ tự động thực thi trọn gói 5 bước: sửa `managed-agents.json`, phát sóng Kind 10100 lên WebSocket Relay, làm mới `buzz-acp`, cấu hình Codex không chờ duyệt và kiểm tra Buzz CLI.
+
+### 2. Về Buzz CLI (`buzz.exe` / `buzz-acp.exe`)
+- **Vai trò**: Buzz CLI là công cụ dòng lệnh đi kèm của **Buzz Desktop App** (`xyz.block.buzz.app`). Nó cần thiết để tạo kênh, phân quyền kênh, thêm thành viên và phát sóng Nostr.
+- **Vị trí và cài đặt**:
+  - Buzz CLI nằm sẵn bên trong thư mục cài đặt của Buzz Desktop (thường ở `%LOCALAPPDATA%\Programs\Buzz` hoặc `D:\Buzz`, `/Applications/Buzz.app`).
+  - Nếu máy chưa cài Buzz Desktop: Tải bộ cài chính thức tại **https://buzz.xyz**.
+  - Nếu đã cài nhưng terminal chưa nhận lệnh `buzz`: Thêm thư mục cài đặt Buzz Desktop vào biến môi trường `PATH`. Các script trong repo đã tích hợp sẵn cơ chế tự động truy quét các thư mục cài đặt này.
 
 ---
 

@@ -19,20 +19,25 @@ if sys.platform == "win32":
 
 def find_buzz_exe():
     """Tự động tìm kiếm đường dẫn buzz.exe trên máy tính"""
+    which_buzz = shutil.which("buzz") or shutil.which("buzz.exe")
+    if which_buzz:
+        return which_buzz
+
     candidates = [
-        r"D:\Buzz\buzz.exe",
         os.path.expandvars(r"%LOCALAPPDATA%\Programs\Buzz\buzz.exe"),
         os.path.expandvars(r"%LOCALAPPDATA%\Buzz\buzz.exe"),
         os.path.expandvars(r"%PROGRAMFILES%\Buzz\buzz.exe"),
-        os.path.expandvars(r"%APPDATA%\..\Local\Programs\Buzz\buzz.exe"),
+        os.path.expandvars(r"%ProgramFiles(x86)%\Buzz\buzz.exe"),
+        r"C:\Buzz\buzz.exe",
+        r"D:\Buzz\buzz.exe",
+        "/Applications/Buzz.app/Contents/MacOS/buzz",
+        "/usr/local/bin/buzz",
+        os.path.expanduser("~/.local/bin/buzz")
     ]
-    which_buzz = shutil.which("buzz")
-    if which_buzz:
-        return which_buzz
     for c in candidates:
         if os.path.exists(c):
             return c
-    return r"D:\Buzz\buzz.exe"
+    return "buzz"
 
 BUZZ_EXE = find_buzz_exe()
 

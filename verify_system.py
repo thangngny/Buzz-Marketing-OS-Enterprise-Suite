@@ -73,7 +73,29 @@ def main():
     else:
         print(f" ℹ️  Chưa tìm thấy managed-agents.json (sẽ được tạo khi chạy master_deploy.py)")
         access_policy_ok = True
-    report.append(("Tầng 1 - Phân quyền tương tác Anyone", access_policy_ok))
+    # Kiểm tra ứng dụng Buzz Desktop & Buzz CLI
+    which_buzz = shutil.which("buzz") or shutil.which("buzz.exe")
+    if not which_buzz and sys.platform == "win32":
+        candidates = [
+            os.path.expandvars(r"%LOCALAPPDATA%\Programs\Buzz\buzz.exe"),
+            os.path.expandvars(r"%LOCALAPPDATA%\Buzz\buzz.exe"),
+            os.path.expandvars(r"%PROGRAMFILES%\Buzz\buzz.exe"),
+            os.path.expandvars(r"%ProgramFiles(x86)%\Buzz\buzz.exe"),
+            r"C:\Buzz\buzz.exe",
+            r"D:\Buzz\buzz.exe",
+        ]
+        for c in candidates:
+            if os.path.exists(c):
+                which_buzz = c
+                break
+    elif not which_buzz and sys.platform == "darwin":
+        if os.path.exists("/Applications/Buzz.app/Contents/MacOS/buzz"):
+            which_buzz = "/Applications/Buzz.app/Contents/MacOS/buzz"
+
+    buzz_cli_ok = bool(which_buzz)
+    buzz_status_str = f"Buzz CLI: {which_buzz}" if buzz_cli_ok else "CHƯA TÌM THẤY (Cài Buzz Desktop tại https://buzz.xyz)"
+    print(f" {check_mark(buzz_cli_ok)} {buzz_status_str}")
+    report.append(("Tầng 1 - Buzz Desktop & Buzz CLI", buzz_cli_ok))
 
     # ----------------- TẦNG 2: BỘ XOAY TÀI KHOẢN (CODEX ROTATOR) -----------------
     print("\n--- 2. KIỂM TRA TẦNG 2: BỘ XOAY TÀI KHOẢN (ROTATOR) ---")

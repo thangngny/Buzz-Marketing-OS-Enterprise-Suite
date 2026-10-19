@@ -129,19 +129,25 @@ def test_custom_harnesses():
 
 # TEST 5: Kiểm tra Tầng 1 - Live Nostr Relay Community
 def test_live_nostr_community():
-    buzz_exe = r"D:\Buzz\buzz.exe"
-    if not os.path.exists(buzz_exe):
+    buzz_exe = shutil.which("buzz") or shutil.which("buzz.exe")
+    if not buzz_exe:
         candidates = [
             os.path.expandvars(r"%LOCALAPPDATA%\Programs\Buzz\buzz.exe"),
             os.path.expandvars(r"%LOCALAPPDATA%\Buzz\buzz.exe"),
             os.path.expandvars(r"%PROGRAMFILES%\Buzz\buzz.exe"),
+            os.path.expandvars(r"%ProgramFiles(x86)%\Buzz\buzz.exe"),
+            r"C:\Buzz\buzz.exe",
+            r"D:\Buzz\buzz.exe",
+            "/Applications/Buzz.app/Contents/MacOS/buzz",
+            "/usr/local/bin/buzz",
+            os.path.expanduser("~/.local/bin/buzz")
         ]
         for c in candidates:
             if os.path.exists(c):
                 buzz_exe = c
                 break
         else:
-            buzz_exe = shutil.which("buzz") or "buzz"
+            buzz_exe = "buzz"
 
     relay = os.environ.get("BUZZ_RELAY") or os.environ.get("BUZZ_RELAY_URL") or "https://ncthang04.communities.buzz.xyz"
     nsec = os.environ.get("BUZZ_NSEC") or "nsec1f2v3zk9x5erm5cck83e3l9r3fw73rx0yr5p29y7xrsswdmfzj62sr2f3sy"
