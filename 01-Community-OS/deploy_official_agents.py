@@ -273,7 +273,10 @@ def main():
     parser = argparse.ArgumentParser(description="Buzz Official Agents Deployer & Private Relay Claimer")
     parser.add_argument("--relay", default="", help="Relay URL (http:// hoặc https:// hoặc wss://)")
     parser.add_argument("--invite", default="", help="Mã mời gia nhập Relay (Invite Code)")
-    parser.add_argument("--company", default="Minh Vân Logistics", help="Tên doanh nghiệp")
+    parser.add_argument("--company", default=os.environ.get("ENTERPRISE_NAME", "Doanh Nghiệp"), help="Tên doanh nghiệp")
+    parser.add_argument("--industry", default=os.environ.get("ENTERPRISE_INDUSTRY", "Thương mại & Dịch vụ"), help="Ngành nghề hoạt động")
+    parser.add_argument("--fanpage-id", default=os.environ.get("FANPAGE_ID", "1181525411706512"), help="ID Fanpage Facebook")
+    parser.add_argument("--brand-handle", default=os.environ.get("BRAND_HANDLE", "enterprise"), help="Handle TikTok / mạng xã hội")
     parser.add_argument("--skip-claim", action="store_true", help="Bỏ qua bước claim invite trên Relay")
     args = parser.parse_args()
 
@@ -284,7 +287,7 @@ def main():
     # 1. Tự động nhận diện Relay URL
     relay_url = args.relay
     if not relay_url:
-        relay_url = os.environ.get("BUZZ_RELAY_URL", "")
+        relay_url = os.environ.get("BUZZ_RELAY_URL") or os.environ.get("BUZZ_RELAY") or ""
     if not relay_url:
         relay_url = "wss://phamgianam.communities.buzz.xyz"
     
@@ -332,9 +335,9 @@ def main():
     from setup_managed_agents import setup_managed_agents
     ok_setup = setup_managed_agents(
         company=args.company,
-        industry="Logistics & Vận tải hàng hải, hàng không, kho bãi",
-        fanpage_id="1181525411706512",
-        brand_handle="minhvanlogistics"
+        industry=args.industry,
+        fanpage_id=args.fanpage_id,
+        brand_handle=args.brand_handle
     )
 
     if ok_setup:

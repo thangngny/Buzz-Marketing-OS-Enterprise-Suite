@@ -16,26 +16,45 @@ if exist "%USERPROFILE%\marketing-ai-system\.venv\Scripts\python.exe" (
     set "PYTHON_CMD=%USERPROFILE%\marketing-ai-system\.venv\Scripts\python.exe"
     goto RUN
 )
-if exist "C:\Users\Admin\marketing-ai-system\.venv\Scripts\python.exe" (
-    set "PYTHON_CMD=C:\Users\Admin\marketing-ai-system\.venv\Scripts\python.exe"
-    goto RUN
-)
 
-:: Kiểm tra python từ PATH
-where python >nul 2>nul
+:: Kiểm tra python từ PATH (chạy thử thực tế để tránh stub Microsoft Store)
+python --version >nul 2>nul
 if %errorlevel% equ 0 (
     set "PYTHON_CMD=python"
     goto RUN
 )
 
 :: Kiểm tra py launcher
-where py >nul 2>nul
+py --version >nul 2>nul
 if %errorlevel% equ 0 (
     set "PYTHON_CMD=py"
     goto RUN
 )
 
-echo [LỖI] Chưa tìm thấy Python trên máy tính này!
+:: Kiểm tra uv python
+where uv >nul 2>nul
+if %errorlevel% equ 0 (
+    set "PYTHON_CMD=uv run python"
+    goto RUN
+)
+
+:: Kiểm tra thư mục cài đặt Python chuẩn người dùng
+for /d %%D in ("%LOCALAPPDATA%\Programs\Python\Python3*") do (
+    if exist "%%D\python.exe" (
+        set "PYTHON_CMD=%%D\python.exe"
+        goto RUN
+    )
+)
+
+:: Kiểm tra thư mục uv python
+for /d %%D in ("%APPDATA%\uv\python\cpython*") do (
+    if exist "%%D\python.exe" (
+        set "PYTHON_CMD=%%D\python.exe"
+        goto RUN
+    )
+)
+
+echo [LỖI] Chưa tìm thấy Python hợp lệ trên máy tính này!
 echo Vui lòng cài đặt Python 3.10+ (tích chọn 'Add Python to PATH') trước khi chạy.
 echo Tải tại: https://www.python.org/downloads/
 echo.

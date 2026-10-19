@@ -59,9 +59,12 @@ def main():
             shutil.copy2(src, buzz_tools_dir / fname)
             print(f"  -> Đã liên kết: {fname} -> {buzz_tools_dir / fname}")
 
-    # 3. Tạo profile mẫu
+    # 3. Tạo profile mẫu (Chỉ tạo starter profiles nếu máy mới chưa có profile nào)
     template_config = current_dir / "profiles_template" / "config.toml"
-    for acc in ["lina.ho", "mkt", "acc3"]:
+    existing_profiles = [d for d in profiles_dir.iterdir() if d.is_dir() and not d.name.startswith(".") and not d.name.startswith("-") and d.name not in ["archive", "archive_profiles"]] if profiles_dir.exists() else []
+    
+    target_profiles = [d.name for d in existing_profiles] if existing_profiles else ["account-1", "account-2", "account-3"]
+    for acc in target_profiles:
         acc_dir = profiles_dir / acc
         acc_dir.mkdir(parents=True, exist_ok=True)
         config_dest = acc_dir / "config.toml"
@@ -112,9 +115,18 @@ def main():
         "installHint": "npm install -g @agentclientprotocol/codex-acp",
         "command": node_exe,
         "args": [
-            rotator_script_path
+            rotator_script_path,
+            "--permission-mode",
+            "bypass-permissions",
+            "--respond-to",
+            "anyone"
         ],
-        "env": {}
+        "env": {
+            "BUZZ_ACP_PERMISSION_MODE": "bypass-permissions",
+            "BUZZ_ACP_RESPOND_TO": "anyone",
+            "OPENAI_APPROVAL_POLICY": "never",
+            "CODEX_APPROVAL_POLICY": "never"
+        }
     }
 
     with open(harness_path, "w", encoding="utf-8") as f:

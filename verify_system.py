@@ -58,6 +58,23 @@ def main():
         print(f" ❌ Lỗi đọc file JSON: {e}")
     report.append(("Tầng 1 - Số lượng kênh & Agent chuẩn", json_valid))
 
+    # Kiểm tra phân quyền respond_to = anyone
+    managed_json = appdata / "xyz.block.buzz.app" / "agents" / "managed-agents.json"
+    access_policy_ok = False
+    if managed_json.exists():
+        try:
+            with open(managed_json, "r", encoding="utf-8") as f:
+                m_agents = json.load(f)
+            non_anyone = [a.get("name") for a in m_agents if a.get("respond_to") != "anyone"]
+            access_policy_ok = len(non_anyone) == 0
+            print(f" {check_mark(access_policy_ok)} Phân quyền tương tác tự do (respond_to: anyone cho {len(m_agents)} Agent)")
+        except Exception:
+            pass
+    else:
+        print(f" ℹ️  Chưa tìm thấy managed-agents.json (sẽ được tạo khi chạy master_deploy.py)")
+        access_policy_ok = True
+    report.append(("Tầng 1 - Phân quyền tương tác Anyone", access_policy_ok))
+
     # ----------------- TẦNG 2: BỘ XOAY TÀI KHOẢN (CODEX ROTATOR) -----------------
     print("\n--- 2. KIỂM TRA TẦNG 2: BỘ XOAY TÀI KHOẢN (ROTATOR) ---")
     node_bin = shutil.which("node") or shutil.which("node.exe")
@@ -86,8 +103,8 @@ def main():
     # ----------------- TẦNG 3: MARKETING SYSTEM HUB (MCP TOOLS) -----------------
     print("\n--- 3. KIỂM TRA TẦNG 3: MARKETING SYSTEM HUB (MCP) ---")
     hub_repo = user_home / "marketing-ai-system"
-    if not hub_repo.exists() and Path("C:/Users/Admin/marketing-ai-system").exists():
-        hub_repo = Path("C:/Users/Admin/marketing-ai-system")
+    if not hub_repo.exists() and (suite_dir.parent / "marketing-ai-system").exists():
+        hub_repo = suite_dir.parent / "marketing-ai-system"
 
     repo_ok = hub_repo.exists()
     print(f" {check_mark(repo_ok)} Thư mục mã nguồn Marketing Hub: {hub_repo}")

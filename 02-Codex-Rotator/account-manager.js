@@ -86,22 +86,21 @@ function getProfileDetails(profileName) {
 }
 
 function listAllProfiles() {
-  const defaultProfiles = ['lina.ho', 'mkt', 'acc3'];
+  const starterProfiles = ['account-1', 'account-2', 'account-3'];
   let existing = [];
   try {
     if (fs.existsSync(PROFILES_DIR)) {
       existing = fs.readdirSync(PROFILES_DIR, { withFileTypes: true })
-        .filter(d => d.isDirectory() && !d.name.startsWith('.') && d.name !== 'archive' && d.name !== 'archive_profiles')
+        .filter(d => d.isDirectory() && !d.name.startsWith('.') && !d.name.includes('-') && d.name !== 'archive' && d.name !== 'archive_profiles')
         .map(d => d.name);
     }
   } catch (e) {}
   
-  const allNames = Array.from(new Set([...defaultProfiles, ...existing]));
+  const allNames = existing.length > 0 ? existing : starterProfiles;
   return allNames.map(name => getProfileDetails(name));
 }
 
-function printStatusTable() {
-  const list = listAllProfiles();
+function printStatusTable(list) {
   console.log('\n========================================================================================');
   console.log('              TRẠNG THÁI CÁC TÀI KHOẢN CHATGPT CODEX ĐANG KẾT NỐI');
   console.log('========================================================================================');
@@ -117,16 +116,16 @@ function printStatusTable() {
   console.log('========================================================================================\n');
 }
 
-function showMenu() {
-  printStatusTable();
+function showMenu(list) {
+  printStatusTable(list);
   console.log('CÁC TÙY CHỌN THAO TÁC:');
-  console.log('  [A] WIZARD LIÊN HOÀN: Đăng nhập lần lượt 3 tài khoản trong 1 lần duy nhất');
+  console.log('  [A] WIZARD LIÊN HOÀN: Đăng nhập lần lượt tất cả tài khoản trong 1 lần duy nhất');
   console.log('  --------------------------------------------------------------------------------------');
-  console.log('  [1] Đăng nhập riêng Tài khoản 1 (lina.ho)');
-  console.log('  [2] Đăng nhập riêng Tài khoản 2 (mkt)');
-  console.log('  [3] Đăng nhập riêng Tài khoản 3 (acc3)');
-  console.log('  [4] Thêm một tài khoản mới khác (Tự đặt tên)');
-  console.log('  [5] Kiểm tra và xoay tua ngay');
+  list.forEach((p, idx) => {
+    console.log(`  [${idx + 1}] Đăng nhập riêng Tài khoản ${idx + 1} (${p.name})`);
+  });
+  console.log('  [+] Thêm một tài khoản mới khác (Tự đặt tên)');
+  console.log('  [R] Kiểm tra và xoay tua ngay (Test Rotator)');
   console.log('  [0] Thoát');
   console.log('----------------------------------------------------------------------------------------');
 }
@@ -179,20 +178,30 @@ function runInteractive() {
   });
 
   function promptMenu() {
-    showMenu();
+    const list = listAllProfiles();
+    showMenu(list);
     rl.question('Nhập lựa chọn của bạn: ', (answer) => {
       const choice = answer.trim().toUpperCase();
       if (choice === '0') {
         console.log('Đã thoát trình quản lý tài khoản.');
         rl.close();
         process.exit(0);
-      } else if (choice === '1') {
-        loginProfile('lina.ho', promptMenu);
-      } else if (choice === '2') {
-        loginProfile('mkt', promptMenu);
-      } else if (choice === '3') {
-        loginProfile('acc3', promptMenu);
-      } else if (choice === '4') {
+      } else if (choice === 'A') {
+        const unauth = list.filter(p => !p.status.includes('ĐÃ KẾT NỐI'));
+        const targets = unauth.length > 0 ? unauth : list;
+        console.log(`\n>>> Bắt đầu tiến trình liên hoàn qua ${targets.length} tài khoản <<<`);
+        
+        function step(index) {
+          if (index >= targets.length) {
+            console.log('\n✅ Hoàn tất tiến trình liên hoàn!');
+            promptMenu();
+            return;
+          }
+          console.log(`\n>>> [${index + 1}/${targets.length}] Đang đăng nhập: ${targets[index].name} <<<`);
+          loginProfile(targets[index].name, () => step(index + 1));
+        }
+        step(0);
+      } else if (choice === '+' || choice === `${list.length + 1}`) {
         rl.question('Nhập tên profile mới (VD: marketing-01): ', (customName) => {
           const cleanName = customName.trim();
           if (cleanName) {
@@ -201,21 +210,19 @@ function runInteractive() {
             promptMenu();
           }
         });
-      } else if (choice === '5') {
+      } else if (choice === 'R' || choice === '5') {
         if (rotator) {
           const next = rotator.getNextProfile('light');
           console.log(`\n[Vận hành] Profile tiếp theo sẽ xử lý: ${next}`);
         }
         promptMenu();
-      } else if (choice === 'A') {
-        console.log('\n>>> Bắt đầu tiến trình liên hoàn: lina.ho -> mkt -> acc3 <<<');
-        loginProfile('lina.ho', () => {
-          loginProfile('mkt', () => {
-            loginProfile('acc3', promptMenu);
-          });
-        });
       } else {
-        promptMenu();
+        const num = parseInt(choice, 10);
+        if (!isNaN(num) && num >= 1 && num <= list.length) {
+          loginProfile(list[num - 1].name, promptMenu);
+        } else {
+          promptMenu();
+        }
       }
     });
   }

@@ -13,20 +13,31 @@ const USER_HOME = process.env.USERPROFILE || process.env.HOME || os.homedir();
 const PROFILES_DIR = process.env.CODEX_PROFILES_DIR || path.join(USER_HOME, '.codex', 'profiles');
 const STATE_FILE = path.join(PROFILES_DIR, '.rotator-state.json');
 
-const DEFAULT_BASE_ACCOUNTS = ['lina.ho', 'mkt', 'acc3'];
+const DEFAULT_BASE_ACCOUNTS = ['account-1', 'account-2', 'account-3'];
 
 function getBaseAccount(profileName) {
-  if (!profileName) return 'mkt';
+  if (!profileName) {
+    const available = getAvailableBaseAccounts();
+    return available.length > 0 ? available[0] : 'account-1';
+  }
   return profileName.replace(/-(light|heavy|balanced)$/, '');
 }
 
 function getAvailableBaseAccounts() {
   if (!fs.existsSync(PROFILES_DIR)) return DEFAULT_BASE_ACCOUNTS;
   try {
-    const discovered = fs.readdirSync(PROFILES_DIR, { withFileTypes: true })
-      .filter(dirent => dirent.isDirectory() && !dirent.name.startsWith('.') && !dirent.name.includes('-') && dirent.name !== 'archive' && dirent.name !== 'archive_profiles' && fs.existsSync(path.join(PROFILES_DIR, dirent.name, 'auth.json')))
+    const dirents = fs.readdirSync(PROFILES_DIR, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory() && !dirent.name.startsWith('.') && !dirent.name.includes('-') && dirent.name !== 'archive' && dirent.name !== 'archive_profiles');
+    
+    // Ưu tiên các profile đã đăng nhập (có auth.json)
+    const withAuth = dirents
+      .filter(dirent => fs.existsSync(path.join(PROFILES_DIR, dirent.name, 'auth.json')))
       .map(dirent => dirent.name);
-    if (discovered.length > 0) return discovered;
+    if (withAuth.length > 0) return withAuth;
+
+    // Nếu chưa đăng nhập profile nào, trả về tất cả các thư mục profile đã tạo
+    const allDirs = dirents.map(dirent => dirent.name);
+    if (allDirs.length > 0) return allDirs;
   } catch (e) {}
   return DEFAULT_BASE_ACCOUNTS;
 }

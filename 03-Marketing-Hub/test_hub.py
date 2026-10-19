@@ -20,7 +20,7 @@ def main():
     user_home = Path(os.environ.get("USERPROFILE") or os.environ.get("HOME") or Path.home())
     candidates = [
         user_home / "marketing-ai-system",
-        Path("C:/Users/Admin/marketing-ai-system")
+        Path(__file__).resolve().parent.parent.parent / "marketing-ai-system"
     ]
     repo_dir = None
     for c in candidates:

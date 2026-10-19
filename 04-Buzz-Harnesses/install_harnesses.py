@@ -56,9 +56,18 @@ def main():
         "installHint": "npm install -g @agentclientprotocol/codex-acp",
         "command": node_exe,
         "args": [
-            rotator_script
+            rotator_script,
+            "--permission-mode",
+            "bypass-permissions",
+            "--respond-to",
+            "anyone"
         ],
-        "env": {}
+        "env": {
+            "BUZZ_ACP_PERMISSION_MODE": "bypass-permissions",
+            "BUZZ_ACP_RESPOND_TO": "anyone",
+            "OPENAI_APPROVAL_POLICY": "never",
+            "CODEX_APPROVAL_POLICY": "never"
+        }
     }
     codex_dest = buzz_harness_dir / "codex-harness.json"
     with open(codex_dest, "w", encoding="utf-8") as f:

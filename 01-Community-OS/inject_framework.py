@@ -209,6 +209,58 @@ def assign_agents_to_channels(relay, private_key, channel_id_map):
 
     print(f"[OK] Hoàn tất: Đã phân bổ đầy đủ {len(bot_pubkeys)} chuyên gia AI vào toàn bộ {total_channels} phòng ban (tổng cộng {assigned_count} lượt nhân sự).")
 
+def broadcast_agent_access_policies(relay, owner_private_key):
+    print("\n" + "="*60)
+    print("BƯỚC 3.5: CÔNG BỐ QUYỀN HẠN NOSTR KIND 10100 (RESPOND_TO: ANYONE)")
+    print("="*60)
+    
+    # 1. Chạy qua buzz.exe channels set-add-policy --policy anyone cho từng agent
+    try:
+        from setup_managed_agents import CANONICAL_AGENTS, get_buzz_paths
+        _, agents_dir, _ = get_buzz_paths()
+        managed_json = agents_dir / "managed-agents.json"
+        agents_data = []
+        if managed_json.exists():
+            with open(managed_json, "r", encoding="utf-8") as f:
+                agents_data = json.load(f)
+        
+        agent_map = {a.get("pubkey"): a for a in agents_data}
+        success_count = 0
+
+        for agent_meta in CANONICAL_AGENTS:
+            name = agent_meta["name"]
+            pk = agent_meta["pubkey"]
+            nsec = agent_meta["nsec"]
+            
+            record = agent_map.get(pk, {})
+            auth_tag = record.get("auth_tag")
+            
+            cmd = [BUZZ_EXE, "--relay", relay, "--private-key", nsec]
+            if auth_tag:
+                cmd.extend(["--auth-tag", auth_tag])
+            cmd.extend(["channels", "set-add-policy", "--policy", "anyone"])
+            
+            res = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
+            if res.returncode == 0 and "accepted" in res.stdout:
+                print(f"  ✅ [Chính sách Kênh: Anyone] {name}")
+                success_count += 1
+            else:
+                print(f"  ⚠️ [Lưu ý] {name}: {res.stdout.strip() or res.stderr.strip()}")
+        
+        print(f"[OK] Đã thiết lập channel_add_policy = anyone cho {success_count}/{len(CANONICAL_AGENTS)} Agent.")
+    except Exception as e:
+        print(f"[!] Ngoại lệ khi cấu hình set-add-policy: {e}")
+
+    # 2. Chạy kịch bản Node WebSocket để phát Kind 10100 kèm respond_to: anyone & owner tag
+    script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "broadcast_kind_10100.js")
+    if os.path.exists(script_path):
+        node_bin = shutil.which("node") or shutil.which("node.exe")
+        if node_bin:
+            try:
+                subprocess.run([node_bin, script_path, "--relay", relay], check=False)
+            except Exception as e:
+                print(f"[!] Bỏ qua phát sóng WebSocket phụ: {e}")
+
 def run_e2e_verification(relay, private_key, channel_id_map, company_name, send_test=False):
     print("\n" + "="*60)
     print("BƯỚC 4: NGHIỆM THU HỆ THỐNG")
@@ -293,6 +345,7 @@ def main():
                 if ok:
                     setup_team_snapshot(base_dir, c_name, "Thương mại & Dịch vụ")
                     assign_agents_to_channels(r, k, c_map)
+                    broadcast_agent_access_policies(r, k)
                     run_e2e_verification(r, k, c_map, c_name, args.send_test)
         print("\n" + "="*60)
         print("✅ ĐÃ HOÀN TẤT THIẾT LẬP HÀNG LOẠT TOÀN BỘ CÁC COMMUNITY!")
@@ -317,6 +370,7 @@ def main():
             if ok:
                 setup_team_snapshot(base_dir, c_name, "Thương mại & Dịch vụ")
                 assign_agents_to_channels(r, k, c_map)
+                broadcast_agent_access_policies(r, k)
                 run_e2e_verification(r, k, c_map, c_name, args.send_test)
 
         print("\n" + "="*60)
@@ -342,9 +396,10 @@ def main():
     # 2. Team Snapshot
     setup_team_snapshot(base_dir, company_name, industry)
 
-    # 3. Phân bổ Agent vào kênh
+    # 3. Phân bổ Agent vào kênh & công bố quyền hạn Kind 10100
     if not args.dry_run:
         assign_agents_to_channels(args.relay, args.private_key, ch_map)
+        broadcast_agent_access_policies(args.relay, args.private_key)
 
     # 4. Kiểm tra thực tế
     if not args.dry_run:

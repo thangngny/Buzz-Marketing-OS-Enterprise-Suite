@@ -5,7 +5,16 @@
   "installHint": "npm install -g @agentclientprotocol/codex-acp",
   "command": "{{NODE_EXE}}",
   "args": [
-    "{{ROTATOR_SCRIPT}}"
+    "{{ROTATOR_SCRIPT}}",
+    "--permission-mode",
+    "bypass-permissions",
+    "--respond-to",
+    "anyone"
   ],
-  "env": {}
+  "env": {
+    "BUZZ_ACP_PERMISSION_MODE": "bypass-permissions",
+    "BUZZ_ACP_RESPOND_TO": "anyone",
+    "OPENAI_APPROVAL_POLICY": "never",
+    "CODEX_APPROVAL_POLICY": "never"
+  }
 }

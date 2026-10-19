@@ -213,10 +213,15 @@ CANONICAL_AGENTS = [
 
 
 def get_buzz_paths():
-    appdata = os.environ.get("APPDATA")
-    if not appdata:
-        appdata = str(Path.home() / "AppData" / "Roaming")
-    base_dir = Path(appdata) / "xyz.block.buzz.app"
+    home = Path.home()
+    if sys.platform == "darwin":
+        base_dir = home / "Library" / "Application Support" / "xyz.block.buzz.app"
+    elif sys.platform == "win32":
+        appdata = os.environ.get("APPDATA") or str(home / "AppData" / "Roaming")
+        base_dir = Path(appdata) / "xyz.block.buzz.app"
+    else:
+        config_home = os.environ.get("XDG_CONFIG_HOME") or str(home / ".config")
+        base_dir = Path(config_home) / "xyz.block.buzz.app"
     agents_dir = base_dir / "agents"
     templates_dir = base_dir / "templates"
     return base_dir, agents_dir, templates_dir
@@ -235,7 +240,12 @@ def load_team_template(template_path, company, industry, fanpage_id, brand_handl
     data = json.loads(raw)
     return data
 
-def setup_managed_agents(company="Minh Văn Logistics", industry="Logistics & Chuỗi Cung Ứng Quốc Tế", fanpage_id="1181525411706512", brand_handle="minhvanlogistics"):
+def setup_managed_agents(company=None, industry=None, fanpage_id=None, brand_handle=None):
+    company = company or os.environ.get("ENTERPRISE_NAME", "Minh Văn Logistics")
+    industry = industry or os.environ.get("ENTERPRISE_INDUSTRY", "Logistics & Chuỗi Cung Ứng Quốc Tế")
+    fanpage_id = fanpage_id or os.environ.get("FANPAGE_ID", "1181525411706512")
+    brand_handle = brand_handle or os.environ.get("BRAND_HANDLE", "minhvanlogistics")
+
     base_dir, agents_dir, templates_dir = get_buzz_paths()
     agents_dir.mkdir(parents=True, exist_ok=True)
     templates_dir.mkdir(parents=True, exist_ok=True)
@@ -313,8 +323,10 @@ def setup_managed_agents(company="Minh Văn Logistics", industry="Logistics & Ch
             target["is_active"] = True
             target["respond_to"] = "anyone"
             target["respondTo"] = "anyone"
+            target["definition_respond_to"] = "anyone"
             target["respond_to_allowlist"] = []
             target["respondToAllowlist"] = []
+            target["agent_args"] = ["--tier", "light", "--permission-mode", "bypass-permissions", "--respond-to", "anyone"]
             if not target.get("pubkey"):
                 target["pubkey"] = pubkey
             if not target.get("private_key_nsec"):
@@ -336,7 +348,7 @@ def setup_managed_agents(company="Minh Văn Logistics", industry="Logistics & Ch
                 "acp_command": "buzz-acp",
                 "agent_command": rotator_cmd if os.path.exists(rotator_cmd) else "",
                 "agent_command_override": rotator_cmd if os.path.exists(rotator_cmd) else None,
-                "agent_args": ["--tier", "light"],
+                "agent_args": ["--tier", "light", "--permission-mode", "bypass-permissions", "--respond-to", "anyone"],
                 "mcp_command": "buzz-dev-mcp",
                 "turn_timeout_seconds": 320,
                 "idle_timeout_seconds": None,

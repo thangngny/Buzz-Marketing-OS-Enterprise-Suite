@@ -19,8 +19,7 @@ const APPDATA_DIR = process.env.APPDATA || path.join(USER_HOME, 'AppData', 'Roam
 let rotator;
 const candidateRotatorPaths = [
   path.join(__dirname, 'codex-rotator.js'),
-  path.join(USER_HOME, '.codex', 'scripts', 'codex-rotator.js'),
-  'C:\\Users\\Admin\\.codex\\scripts\\codex-rotator.js'
+  path.join(USER_HOME, '.codex', 'scripts', 'codex-rotator.js')
 ];
 
 for (const p of candidateRotatorPaths) {
@@ -40,14 +39,27 @@ if (tierIdx !== -1 && rawArgs[tierIdx + 1]) {
   rawArgs.splice(tierIdx, 2);
 }
 
-const chosenProfile = (rotator && rotator.getNextProfile(tier)) || 'mkt';
+const fallbackProfile = (rotator && typeof rotator.getAvailableBaseAccounts === 'function' && rotator.getAvailableBaseAccounts()[0]) || 'account-1';
+const chosenProfile = (rotator && rotator.getNextProfile(tier)) || fallbackProfile;
 const profileHome = rotator ? rotator.getProfileHome(chosenProfile) : path.join(USER_HOME, '.codex', 'profiles', chosenProfile);
 
 const spawnEnv = Object.assign({}, process.env, {
   CODEX_HOME: profileHome,
   BUZZ_PRIVATE_KEY: process.env.BUZZ_PRIVATE_KEY || '',
-  BUZZ_RELAY: process.env.BUZZ_RELAY || ''
+  BUZZ_RELAY: process.env.BUZZ_RELAY || '',
+  BUZZ_ACP_PERMISSION_MODE: 'bypass-permissions',
+  BUZZ_ACP_RESPOND_TO: 'anyone',
+  OPENAI_APPROVAL_POLICY: 'never',
+  CODEX_APPROVAL_POLICY: 'never'
 });
+
+// Ensure permission bypass & anyone response modes are always passed
+if (!rawArgs.includes('--permission-mode')) {
+  rawArgs.push('--permission-mode', 'bypass-permissions');
+}
+if (!rawArgs.includes('--respond-to')) {
+  rawArgs.push('--respond-to', 'anyone');
+}
 
 // Locate codex-acp binary
 function findCodexAcp() {
