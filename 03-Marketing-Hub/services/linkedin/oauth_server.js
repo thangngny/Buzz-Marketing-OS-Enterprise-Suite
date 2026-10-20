@@ -15,22 +15,34 @@ const DEFAULT_SCOPES = [
 
 async function startOAuthFlow(customScope = null) {
     const config = linkedinApi.config;
-    if (!config.client_id || !config.client_secret) {
+    
+    const appArgIdx = process.argv.indexOf("--app");
+    const useCompany = (appArgIdx !== -1 && process.argv[appArgIdx + 1] === "company") || process.argv.includes("--company");
+    const targetClientId = (useCompany && config.company_client_id) ? config.company_client_id : config.client_id;
+    const targetClientSecret = (useCompany && config.company_client_secret) ? config.company_client_secret : config.client_secret;
+
+    if (!targetClientId || !targetClientSecret) {
         console.error("❌ Chưa có client_id hoặc client_secret trong linkedin_config.json");
         console.error("Vui lòng cấu hình qua: linkedin-control set-credentials --client-id <id> --client-secret <secret>");
         process.exit(1);
     }
 
+    if (useCompany) {
+        console.log(`🏢 Đang kích hoạt chế độ xác thực cho ỨNG DỤNG CÔNG TY (App ID: ${config.company_app_id || '264144463'})...`);
+    }
+
     const scopeArgIdx = process.argv.indexOf("--scope");
     const cliScope = scopeArgIdx !== -1 && process.argv[scopeArgIdx + 1] ? process.argv[scopeArgIdx + 1] : null;
-    const requestedScope = customScope || cliScope || config.requested_scopes || DEFAULT_SCOPES;
+    const companyScopes = ['openid', 'profile', 'email', 'w_member_social', 'w_organization_social', 'r_organization_social', 'rw_organization_admin'].join(' ');
+    const defaultTargetScope = useCompany ? companyScopes : DEFAULT_SCOPES;
+    const requestedScope = customScope || cliScope || defaultTargetScope;
 
     const state = Math.random().toString(36).substring(2) + Date.now().toString(36);
     const redirectUri = config.redirect_uri || `http://localhost:${PORT}/callback`;
 
     const authUrl = `https://www.linkedin.com/oauth/v2/authorization?` + querystring.stringify({
         response_type: 'code',
-        client_id: config.client_id,
+        client_id: targetClientId,
         redirect_uri: redirectUri,
         state: state,
         scope: requestedScope
@@ -62,8 +74,8 @@ async function startOAuthFlow(customScope = null) {
                     grant_type: 'authorization_code',
                     code: code,
                     redirect_uri: redirectUri,
-                    client_id: config.client_id,
-                    client_secret: config.client_secret
+                    client_id: targetClientId,
+                    client_secret: targetClientSecret
                 });
 
                 const tokenRes = await linkedinApi.requestRaw('https://www.linkedin.com/oauth/v2/accessToken', 'POST', {
@@ -74,15 +86,22 @@ async function startOAuthFlow(customScope = null) {
                     throw new Error(`Phản hồi Token không hợp lệ: ${JSON.stringify(tokenRes)}`);
                 }
 
-                config.access_token = tokenRes.access_token;
-                config.expires_at = Date.now() + (parseInt(tokenRes.expires_in, 10) || 5184000) * 1000;
+                if (useCompany) {
+                    config.company_access_token = tokenRes.access_token;
+                    config.company_expires_at = Date.now() + (parseInt(tokenRes.expires_in, 10) || 5184000) * 1000;
+                    config.access_token = tokenRes.access_token;
+                    config.expires_at = config.company_expires_at;
+                } else {
+                    config.access_token = tokenRes.access_token;
+                    config.expires_at = Date.now() + (parseInt(tokenRes.expires_in, 10) || 5184000) * 1000;
+                }
                 if (tokenRes.refresh_token) {
                     config.refresh_token = tokenRes.refresh_token;
                     config.refresh_token_expires_at = Date.now() + (parseInt(tokenRes.refresh_token_expires_in, 10) || 31536000) * 1000;
                 }
 
                 linkedinApi.saveConfig();
-                console.log("✅ Đã lưu Access Token (Hiệu lực: 60 ngày)!");
+                console.log(`✅ Đã lưu ${useCompany ? 'Company ' : ''}Access Token (Hiệu lực: 60 ngày)!`);
 
                 // Lấy thông tin user
                 try {
