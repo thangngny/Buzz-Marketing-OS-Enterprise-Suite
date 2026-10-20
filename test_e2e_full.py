@@ -94,8 +94,11 @@ def test_rotator_engine():
 
 # TEST 3: Kiểm tra Tầng 3 - Marketing Hub MCP Tools
 def test_marketing_hub():
+    user_home = Path(os.environ.get("USERPROFILE") or os.environ.get("HOME") or Path.home())
+    venv_python = user_home / "marketing-ai-system" / ".venv" / ("Scripts" if os.name == "nt" else "bin") / ("python.exe" if os.name == "nt" else "python")
+    py_exec = str(venv_python) if venv_python.exists() else sys.executable
     res = subprocess.run([
-        sys.executable, str(SUITE_ROOT / "03-Marketing-Hub" / "test_hub.py")
+        py_exec, str(SUITE_ROOT / "03-Marketing-Hub" / "test_hub.py")
     ], capture_output=True, text=True, encoding="utf-8", errors="replace")
     if res.returncode != 0:
         return False, f"test_hub.py thất bại: {res.stderr}"
