@@ -97,6 +97,45 @@ def main():
     else:
         print(f"  -> Đã tồn tại file .env: {env_file}")
 
+    # 4.5 Cài đặt LinkedIn Multi-Tier Resilient Services
+    print_step("Cài đặt bộ điều phối xuất bản LinkedIn (Multi-Tier Resilient Services):")
+    bundled_linkedin = Path(__file__).resolve().parent / "services" / "linkedin"
+    user_buzz_linkedin = user_home / ".buzz" / "services" / "linkedin"
+    if bundled_linkedin.exists():
+        user_buzz_linkedin.mkdir(parents=True, exist_ok=True)
+        for item in bundled_linkedin.glob("*.js"):
+            shutil.copy2(item, user_buzz_linkedin / item.name)
+            print(f"  -> Đã cài đặt dịch vụ LinkedIn: {item.name} -> {user_buzz_linkedin / item.name}")
+
+    # 4.6 Tự động liên kết LinkedIn Controller vào catalog.py
+    catalog_py = target_repo_dir / "src" / "marketing_system" / "tools" / "catalog.py"
+    if catalog_py.exists():
+        try:
+            txt = catalog_py.read_text(encoding="utf-8")
+            if 'elif args.channel == "linkedin":' not in txt:
+                target_marker = '    else:\n        raise NotImplementedError(f"Publishing to channel \'{args.channel}\' is not enabled or requires product approval.")'
+                linkedin_block = (
+                    '    elif args.channel == "linkedin":\n'
+                    '        import subprocess, json\n'
+                    '        from pathlib import Path\n'
+                    '        cli_path = Path.home() / ".buzz" / "services" / "linkedin" / "linkedin_cli.js"\n'
+                    '        if cli_path.is_file():\n'
+                    '            cmd = ["node", str(cli_path), "post", "--text", args.text]\n'
+                    '            proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")\n'
+                    '            try:\n'
+                    '                return json.loads(proc.stdout.strip())\n'
+                    '            except Exception:\n'
+                    '                return {"channel": "linkedin", "status": "published" if proc.returncode == 0 else "fallback_triggered", "output": proc.stdout.strip(), "error": proc.stderr.strip()}\n'
+                    '        raise ToolUnavailable("NOT_CONFIGURED", f"LinkedIn CLI not found at {cli_path}")\n'
+                    '    else:\n'
+                    '        raise NotImplementedError(f"Publishing to channel \'{args.channel}\' is not enabled or requires product approval.")'
+                )
+                if target_marker in txt:
+                    catalog_py.write_text(txt.replace(target_marker, linkedin_block), encoding="utf-8")
+                    print("  ✅ Đã tự động tích hợp LinkedIn Multi-Tier vào catalog.py của Marketing Hub.")
+        except Exception as e:
+            print(f"  [!] Lưu ý cấu hình catalog.py: {e}")
+
     # 5. Đăng ký Harness vào Buzz Desktop
     print_step("Đăng ký Harness 'marketing-hub' vào Buzz Desktop:")
     buzz_harness_dir.mkdir(parents=True, exist_ok=True)

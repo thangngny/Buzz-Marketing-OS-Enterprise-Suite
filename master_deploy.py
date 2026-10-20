@@ -37,9 +37,19 @@ def deploy_layer_1(community_url=None, nsec=None):
     print("=" * 80)
     # Bước 1.1: Đồng bộ Agents & Teams vào ứng dụng Buzz Desktop cục bộ
     setup_agents_script = SUITE_ROOT / "01-Community-OS" / "setup_managed_agents.py"
-    run_script(setup_agents_script)
+    cmd_agents = []
+    if community_url:
+        cmd_agents.extend(["--relay", community_url])
+    run_script(setup_agents_script, cmd_agents)
 
-    # Bước 1.2: Xây dựng Kênh phòng ban & Phân quyền trên Community Relay
+    # Bước 1.2: Mở toàn quyền (Universal Public Access: anyone, bypass-permissions, Kind 10100)
+    unlock_script = SUITE_ROOT / "01-Community-OS" / "unlock_full_permissions.py"
+    cmd_unlock = ["--no-launch"]
+    if community_url:
+        cmd_unlock.extend(["--relay", community_url])
+    run_script(unlock_script, cmd_unlock)
+
+    # Bước 1.3: Xây dựng Kênh phòng ban & Phân quyền trên Community Relay
     injector_script = SUITE_ROOT / "01-Community-OS" / "inject_framework.py"
     cmd_args = []
     if community_url:

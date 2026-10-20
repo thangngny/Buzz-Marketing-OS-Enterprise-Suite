@@ -66,7 +66,20 @@ def main():
     parser.add_argument("--send-ping", action="store_true", default=True, help="Gửi tin nhắn giả lập vào kênh test-agents")
     args = parser.parse_args()
 
-    relay = args.relay or os.environ.get("BUZZ_RELAY") or os.environ.get("BUZZ_RELAY_URL") or "https://ncthang04.communities.buzz.xyz"
+    relay = args.relay or os.environ.get("BUZZ_RELAY") or os.environ.get("BUZZ_RELAY_URL")
+    if not relay:
+        try:
+            from importlib.machinery import SourceFileLoader
+            suite_dir = Path(__file__).resolve().parent
+            setup_mod = SourceFileLoader("setup_managed_agents", str(suite_dir / "01-Community-OS" / "setup_managed_agents.py")).load_module()
+            detected = setup_mod.detect_community_relay()
+            if detected:
+                if detected.startswith("ws://"): relay = "http://" + detected[5:]
+                elif detected.startswith("wss://"): relay = "https://" + detected[6:]
+        except Exception:
+            pass
+    if not relay:
+        relay = "https://ncthang04.communities.buzz.xyz"
     nsec = args.nsec or os.environ.get("BUZZ_NSEC") or "nsec1f2v3zk9x5erm5cck83e3l9r3fw73rx0yr5p29y7xrsswdmfzj62sr2f3sy"
 
     buzz_bin = find_buzz_cli()

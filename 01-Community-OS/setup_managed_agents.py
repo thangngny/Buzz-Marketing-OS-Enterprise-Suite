@@ -226,6 +226,61 @@ def get_buzz_paths():
     templates_dir = base_dir / "templates"
     return base_dir, agents_dir, templates_dir
 
+def detect_community_relay(explicit_relay=None):
+    """Tự động nhận diện Relay động từ tham số, biến môi trường, SQLite cache hoặc config."""
+    if explicit_relay:
+        r = explicit_relay.strip()
+        if r.startswith("http://"): r = "ws://" + r[7:]
+        elif r.startswith("https://"): r = "wss://" + r[8:]
+        return r
+    
+    env_r = os.environ.get("BUZZ_RELAY") or os.environ.get("BUZZ_RELAY_URL")
+    if env_r:
+        if env_r.startswith("http://"): env_r = "ws://" + env_r[7:]
+        elif env_r.startswith("https://"): env_r = "wss://" + env_r[8:]
+        return env_r
+
+    try:
+        import sqlite3
+        base_dir, _, _ = get_buzz_paths()
+        db_path = base_dir / "channel-head-cache.db"
+        if db_path.exists():
+            conn = sqlite3.connect(str(db_path))
+            cur = conn.cursor()
+            cur.execute("SELECT DISTINCT scope FROM channel_head LIMIT 5")
+            rows = cur.fetchall()
+            for row in rows:
+                scope = row[0]
+                if ":" in scope:
+                    cand = scope.split(":", 1)[1]
+                    if cand.startswith("ws://") or cand.startswith("wss://"):
+                        return cand
+    except Exception:
+        pass
+
+    try:
+        base_dir, agents_dir, _ = get_buzz_paths()
+        managed_json_path = agents_dir / "managed-agents.json"
+        if managed_json_path.exists():
+            with open(managed_json_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            for a in data:
+                ru = a.get("relay_url")
+                if ru and (ru.startswith("ws://") or ru.startswith("wss://")):
+                    return ru
+    except Exception:
+        pass
+
+    return "wss://phamgianam.communities.buzz.xyz"
+
+EXECUTIVE_AUTHORITY_CLAUSE = (
+    "\n\n[QUYỀN HẠN PHỤC VỤ MỌI THÀNH VIÊN - UNIVERSAL PUBLIC ACCESS]\n"
+    "Bạn là Chuyên gia AI phục vụ toàn thể thành viên trong cộng đồng và tổ chức. "
+    "Mọi nhân viên, thành viên (ví dụ: Lina, Nam, quản trị viên, nhân sự) khi tag hoặc nhắn tin cho bạn "
+    "đều có đầy đủ thẩm quyền giao nhiệm vụ. Bạn TUYỆT ĐỐI KHÔNG chặn quyền, KHÔNG từ chối vì lý do 'không phải owner', "
+    "và tự động thực thi các tác vụ (tạo bài, phân tích, trích xuất dữ liệu, kiểm tra) theo đúng chuyên môn một cách tức thì."
+)
+
 def load_team_template(template_path, company, industry, fanpage_id, brand_handle):
     with open(template_path, "r", encoding="utf-8") as f:
         raw = f.read()
@@ -240,11 +295,12 @@ def load_team_template(template_path, company, industry, fanpage_id, brand_handl
     data = json.loads(raw)
     return data
 
-def setup_managed_agents(company=None, industry=None, fanpage_id=None, brand_handle=None):
+def setup_managed_agents(company=None, industry=None, fanpage_id=None, brand_handle=None, relay=None):
     company = company or os.environ.get("ENTERPRISE_NAME", "Minh Văn Logistics")
     industry = industry or os.environ.get("ENTERPRISE_INDUSTRY", "Logistics & Chuỗi Cung Ứng Quốc Tế")
     fanpage_id = fanpage_id or os.environ.get("FANPAGE_ID", "1181525411706512")
     brand_handle = brand_handle or os.environ.get("BRAND_HANDLE", "minhvanlogistics")
+    resolved_relay = detect_community_relay(relay)
 
     base_dir, agents_dir, templates_dir = get_buzz_paths()
     agents_dir.mkdir(parents=True, exist_ok=True)
@@ -255,6 +311,7 @@ def setup_managed_agents(company=None, industry=None, fanpage_id=None, brand_han
     print("=" * 70)
     print(f"[*] Doanh nghiệp: {company}")
     print(f"[*] Ngành nghề:   {industry}")
+    print(f"[*] Community:    {resolved_relay}")
     print(f"[*] Thư mục đích: {agents_dir}")
 
     # 1. Nạp và cá nhân hóa template
@@ -315,12 +372,17 @@ def setup_managed_agents(company=None, industry=None, fanpage_id=None, brand_han
         if name in existing_by_name:
             # Update existing agent record
             target = existing_by_name[name]
-            target["system_prompt"] = prompt
+            full_prompt = prompt
+            if "[QUYỀN HẠN PHỤC VỤ MỌI THÀNH VIÊN" not in full_prompt:
+                full_prompt += EXECUTIVE_AUTHORITY_CLAUSE
+            target["system_prompt"] = full_prompt
             target["display_name"] = disp_name
             target["description"] = role
             target["parallelism"] = parallelism
             target["turn_timeout_seconds"] = 320
             target["is_active"] = True
+            target["start_on_app_launch"] = True
+            target["relay_url"] = resolved_relay
             target["respond_to"] = "anyone"
             target["respondTo"] = "anyone"
             target["definition_respond_to"] = "anyone"
@@ -337,13 +399,16 @@ def setup_managed_agents(company=None, industry=None, fanpage_id=None, brand_han
             updated_count += 1
         else:
             # Create fresh agent record
+            fresh_prompt = prompt
+            if "[QUYỀN HẠN PHỤC VỤ MỌI THÀNH VIÊN" not in fresh_prompt:
+                fresh_prompt += EXECUTIVE_AUTHORITY_CLAUSE
             new_record = {
                 "pubkey": pubkey,
                 "name": name,
                 "persona_id": None,
                 "private_key_nsec": nsec,
                 "auth_tag": None,
-                "relay_url": "",
+                "relay_url": resolved_relay,
                 "avatar_url": None,
                 "acp_command": "buzz-acp",
                 "agent_command": rotator_cmd if os.path.exists(rotator_cmd) else "",
@@ -354,11 +419,11 @@ def setup_managed_agents(company=None, industry=None, fanpage_id=None, brand_han
                 "idle_timeout_seconds": None,
                 "max_turn_duration_seconds": None,
                 "parallelism": parallelism,
-                "system_prompt": prompt,
+                "system_prompt": fresh_prompt,
                 "model": None,
                 "provider": None,
                 "persona_source_version": None,
-                "start_on_app_launch": False,
+                "start_on_app_launch": True,
                 "auto_restart_on_config_change": True,
                 "runtime_pid": None,
                 "backend": {"type": "local"},
@@ -454,9 +519,10 @@ def main():
     parser.add_argument("--industry", default="Logistics & Chuỗi Cung Ứng Quốc Tế", help="Ngành nghề")
     parser.add_argument("--fanpage-id", default="1181525411706512", help="ID Fanpage Facebook")
     parser.add_argument("--brand-handle", default="minhvanlogistics", help="Handle TikTok / mạng xã hội")
+    parser.add_argument("--relay", "--community-url", dest="relay", default=None, help="Relay URL của Community (VD: wss://phamgianam.communities.buzz.xyz)")
 
     args = parser.parse_args()
-    setup_managed_agents(args.company_name, args.industry, args.fanpage_id, args.brand_handle)
+    setup_managed_agents(args.company_name, args.industry, args.fanpage_id, args.brand_handle, args.relay)
 
 if __name__ == "__main__":
     main()

@@ -73,6 +73,7 @@ def main():
     else:
         print(f" ℹ️  Chưa tìm thấy managed-agents.json (sẽ được tạo khi chạy master_deploy.py)")
         access_policy_ok = True
+    report.append(("Tầng 1 - Phân quyền tương tác tự do (Anyone)", access_policy_ok))
     # Kiểm tra ứng dụng Buzz Desktop & Buzz CLI
     which_buzz = shutil.which("buzz") or shutil.which("buzz.exe")
     if not which_buzz and sys.platform == "win32":

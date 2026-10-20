@@ -8,7 +8,7 @@
 
 ## 1. TỔNG QUAN KIẾN TRÚC HỆ THỐNG (SYSTEM ARCHITECTURE)
 
-Hệ điều hành Buzz Marketing OS Full Enterprise gồm **3 TẦNG KẾT HỢP**:
+Hệ điều hành Buzz Marketing OS Full Enterprise gồm **3 TẦNG KẾT HỢP (DYNAMIC & PATH-AGNOSTIC)**:
 
 ```
 +----------------------------------------------------------------------------------+
@@ -19,13 +19,21 @@ Hệ điều hành Buzz Marketing OS Full Enterprise gồm **3 TẦNG KẾT HỢ
 +-----------------------+     +-------------------------------+     +--------------------+
 |        TẦNG 1         |     |            TẦNG 2             |     |       TẦNG 3       |
 |  COMMUNITY & ROSTER   |     |     CODEX ACCOUNT ROTATOR     |     |   MARKETING HUB    |
-| (Nostr Relay Engine)  |     |   (Load Balancing & Quotas)   |     |    (MCP Server)    |
+| (Nostr Relay Engine)  |     |   (Dynamic Multi-Account)     |     |    (MCP Server)    |
 +-----------------------+     +-------------------------------+     +--------------------+
-| * 28 Phòng ban chuẩn  |     | * Multi-account pool (3 accs) |     | * FastMCP Server   |
+| * 28 Phòng ban chuẩn  |     | * Dynamic Pool (1-N accounts) |     | * FastMCP Server   |
 | * 25 Agent chuyên gia |     | * Auto-failover & cooldown    |     | * Zoho CRM, Meta   |
-| * SOP & Prompt chuẩn  |     | * ACP Protocol JSON-RPC       |     | * TikTok, YouTube  |
-| * 700+ memberships    |     | * Thư mục ~/.codex/profiles/  |     | * Google Drive     |
+| * respond_to: anyone  |     | * Tier routing (light/heavy)  |     | * TikTok, YouTube  |
+| * Kind 10100 (Anyone) |     | * ACP Protocol JSON-RPC       |     | * LinkedIn Multi-  |
+| * bypass-permissions  |     | * Thư mục ~/.codex/profiles/  |     |   Tier Controller  |
 +-----------------------+     +-------------------------------+     +--------------------+
+                                                |
+                                                v
+                               +---------------------------------+
+                               |             TẦNG 4              |
+                               |      BUZZ CUSTOM HARNESSES      |
+                               | (codex-harness + marketing-hub) |
+                               +---------------------------------+
 ```
 
 ---
@@ -33,90 +41,80 @@ Hệ điều hành Buzz Marketing OS Full Enterprise gồm **3 TẦNG KẾT HỢ
 ## 2. ĐIỀU KIỆN TIÊN QUYẾT (PRE-FLIGHT CHECKS)
 
 Trước khi thực thi, hãy kiểm tra máy đích có các công cụ sau:
-1. **Python 3.10+**: Kiểm tra bằng `python --version`. Nếu máy Windows trỏ vào Windows Store alias, hãy tìm python thật trong `%LOCALAPPDATA%\Programs\Python` hoặc thông qua virtualenv.
+1. **Python 3.10+**: Kiểm tra bằng `python --version` (hoặc `py`, `python3`).
 2. **Node.js 18+**: Kiểm tra bằng `node -v` và `npm -v`.
 3. **Git**: Kiểm tra bằng `git --version`.
-4. **Buzz Desktop App**: Đã cài đặt, kiểm tra xem thư mục `%APPDATA%\xyz.block.buzz.app` có tồn tại.
+4. **Buzz Desktop App**: Đã cài đặt, thư mục `%APPDATA%\xyz.block.buzz.app` (hoặc macOS/Linux config) đã có sẵn hoặc sẽ khởi tạo khi chạy Buzz Desktop.
 
 ---
 
-## 3. QUY TRÌNH THỰC THI TOÀN DIỆN (EXECUTION WORKFLOW)
+## 3. NGUYÊN TẮC LINH HOẠT CỦA BỘ XOAY TÀI KHOẢN (CODEX ROTATOR ENGINE)
 
-### CÁCH 1: Thực thi Tự Động Toàn Phần (Khuyên dùng cho Agent)
+1. **Khám phá tài khoản động (Dynamic Account Discovery)**:
+   - Hệ thống **KHÔNG CỐ ĐỊNH** 3 tài khoản. Bất kỳ thư mục nào trong `~/.codex/profiles/` chứa tệp `auth.json` hợp lệ sẽ tự động được đưa vào danh sách xoay tua (Round-Robin).
+   - Tên profile hỗ trợ mọi định dạng: `acc1`, `account-1`, `lina.ho`, `mkt-team`, `sales-01`... (không còn bị hạn chế bởi ký tự gạch nối `-`).
+2. **Quản lý & Thêm mới tài khoản**:
+   - Sử dụng lệnh: `node 02-Codex-Rotator/account-manager.js` hoặc chạy file `02-Codex-Rotator/Quan-Ly-Tai-Khoan.bat`.
+   - Chọn `[A]` (Wizard liên hoàn) để đăng nhập tự động qua trình duyệt hoặc `[+]` để thêm tài khoản mới.
+3. **Cơ chế Cooldown & Failover**:
+   - Khi một tài khoản gặp Rate Limit 429 hoặc cạn token, hệ thống tự động cách ly tài khoản đó trong 30-60 phút và chuyển sang tài khoản kế tiếp trong pool mà không làm gián đoạn tác vụ người dùng.
 
-Nếu người dùng đã cung cấp **Link Community** và **Mã khóa riêng tư (nsec)**, Agent hãy chạy lệnh:
+---
+
+## 4. QUY TRÌNH THỰC THI TOÀN DIỆN (EXECUTION WORKFLOW)
+
+### CÁCH 1: Thực thi Tự Động Toàn Phần (Khuyên dùng cho Coding Agent)
+
+Nếu người dùng đã cung cấp **Link Community** và **Mã khóa riêng tư (nsec)**:
 
 ```bash
 python master_deploy.py --all --community-url "<COMMUNITY_URL>" --nsec "<OWNER_NSEC>"
 ```
 
-### CÁCH 2: Thực thi Chi Tiết Từng Tầng (Step-by-Step)
+Script sẽ tự động chạy liên hoàn:
+1. **Tầng 2**: Cấu hình bộ xoay tài khoản Codex vào `~/.codex` và nạp harness.
+2. **Tầng 3**: Dựng Marketing Hub MCP, cài đặt môi trường ảo `.venv`, tích hợp dịch vụ xuất bản LinkedIn đa tầng.
+3. **Tầng 4**: Đăng ký các Harness `codex-harness.json` và `marketing-hub.json` vào Buzz Desktop.
+4. **Tầng 1**: 
+   - Đồng bộ 23 Chuyên gia AI vào `managed-agents.json` với chính sách `respond_to: anyone` và `start_on_app_launch: true`.
+   - Mở toàn quyền thực thi `unlock_full_permissions.py` và ký phát sóng Nostr Kind 10100 lên Community Relay.
+   - Bơm 28 phòng ban chuẩn vào Relay và đưa 25 bot vào túc trực.
+5. **Nghiệm thu**: Tự động chạy `verify_system.py` (11/11 PASS) và `test_e2e_full.py` (6/6 PASS).
 
-Nếu muốn kiểm soát từng tầng hoặc xử lý ngoại lệ:
+---
+
+### CÁCH 2: Thực thi Chi Tiết Từng Tầng (Step-by-Step)
 
 #### Bước 1: Triển khai Tầng 2 - Bộ Xoay Tài Khoản (Codex Rotator)
 ```bash
 python 02-Codex-Rotator/setup_rotator.py
 ```
-* **Nhiệm vụ tự động hoàn thành:**
-  * Khởi tạo `~/.codex/scripts` và `~/.codex/profiles`.
-  * Sao chép `codex-rotator.js` và `codex-acp-rotator.js` (bản dynamic path).
-  * Chuẩn bị thư viện `@agentclientprotocol/codex-acp` trong `%APPDATA%\Buzz\node-tools`.
-  * Đăng ký Harness `codex-harness.json` vào `%APPDATA%\xyz.block.buzz.app\custom_harnesses\`.
 
 #### Bước 2: Triển khai Tầng 3 - Marketing System Hub (MCP Tools)
 ```bash
 python 03-Marketing-Hub/setup_hub.py
 ```
-* **Nhiệm vụ tự động hoàn thành:**
-  * Clone mã nguồn từ `https://github.com/thangngny/marketing-ai-system.git` về `~/marketing-ai-system`.
-  * Tạo môi trường ảo `.venv` và cài đặt dependencies (`fastmcp`, `pydantic`, `httpx`...).
-  * Khởi tạo `.env` từ `.env.example` (chế độ an toàn `mock/dry-run`).
-  * Đăng ký Harness `marketing-hub.json` vào Buzz Desktop.
 
-#### Bước 3: Triển khai Tầng 1 - Đồng bộ Agent vào Buzz & Bơm Khung Community
+#### Bước 3: Triển khai Tầng 4 - Custom Harnesses cho Buzz Desktop
 ```bash
-# Đồng bộ Agent vào ứng dụng Buzz Desktop cục bộ (managed-agents.json & templates)
-python 01-Community-OS/setup_managed_agents.py
+python 04-Buzz-Harnesses/install_harnesses.py
+```
 
-# Xây dựng kênh và phân quyền bot trên Community Relay
+#### Bước 4: Triển khai Tầng 1 - Đồng bộ Agent & Bơm Khung Community
+```bash
+# 1. Cài đặt Agent vào managed-agents.json với quyền anyone
+python 01-Community-OS/setup_managed_agents.py --relay "<COMMUNITY_URL>"
+
+# 2. Mở toàn quyền tương tác & phát sóng Kind 10100 lên Relay
+python 01-Community-OS/unlock_full_permissions.py --relay "<COMMUNITY_URL>"
+
+# 3. Xây dựng kênh và phân quyền bot trên Community Relay
 python 01-Community-OS/inject_framework.py --url "<COMMUNITY_URL>" --nsec "<OWNER_NSEC>"
 ```
-* **Nhiệm vụ tự động hoàn thành:**
-  * Nạp trực tiếp 23 Agent chuyên gia vào `%APPDATA%\xyz.block.buzz.app\agents\managed-agents.json` và `teams.json`.
-  * Kết nối WebSocket WSS vào Relay của Community.
-  * Ký Nostr Kind 40 tạo 28 phòng ban chuẩn hóa.
-  * Ký Nostr Kind 0 khởi tạo 25 nhân sự AI chuẩn tên chuyên nghiệp.
-  * Ký Nostr Kind 9021 đưa toàn bộ 25 bot vào 28 phòng ban (700+ quan hệ thành viên).
 
-#### Bước 4: Chạy Bộ Kiểm Tra Chuẩn Đoán (Verification)
+#### Bước 5: Kiểm Tra Chuẩn Đoán & Nghiệm Thu E2E
 ```bash
 python verify_system.py
+python test_e2e_full.py
 ```
-* Agent đọc kết quả: Nếu tất cả 10 mục đều hiển thị `✅ [PASS]`, toàn bộ hệ điều hành đã được tích hợp hoàn hảo.
-
----
-
-## 4. HƯỚNG DẪN NGƯỜI DÙNG THỰC THI CÁC BƯỚC GIAO DIỆN (UI STEPS)
-
-Sau khi hoàn thành phần lệnh chạy ngầm, toàn bộ Agent đã tự động hiện diện trong Buzz Desktop. Người dùng chỉ cần:
-
-### A. Nhập Team Snapshot vào Buzz Desktop (Nếu muốn import thủ công qua UI)
-1. Mở ứng dụng **Buzz Desktop**.
-2. **Nhập cả Đội ngũ:** Chọn **Teams** -> **Import Team Snapshot** -> Chọn `01-Community-OS/Marketing-OS-Full.team.json` (hoặc `Marketing-OS-NCTHANG04.team.json`).
-3. **Nhập lẻ từng Agent:** Chọn **Agents** -> **Import Agent** -> Chọn bất kỳ file nào trong thư mục `01-Community-OS/individual-agents/`.
-4. ⚠️ **Lưu ý:** Không chọn file `agents_template.json` trong giao diện UI vì đó là file code template mảng thô.
-
-### B. Đăng nhập tài khoản ChatGPT / Codex (Nếu dùng nhiều tài khoản xoay tua)
-1. Chạy file: `02-Codex-Rotator/Quan-Ly-Tai-Khoan.bat` (hoặc `node 02-Codex-Rotator/account-manager.js`).
-2. Chọn `[1]` để đăng nhập tài khoản 1, `[2]` tài khoản 2, hoặc `[A]` để chạy trình hướng dẫn liên hoàn.
-3. Trình duyệt tự động mở `https://auth.openai.com/codex/device` -> Người dùng nhập mã xác thực -> Hoàn tất lưu token vĩnh viễn vào profile riêng.
-
----
-
-## 5. THỰC THI KHI NGƯỜI DÙNG YÊU CẦU KẾT NỐI API THỰC TẾ (LIVE MUTATIONS)
-* Mặc định hệ thống hoạt động ở chế độ `MARKETING_ENVIRONMENT=mock` (an toàn, lập chiến lược và tạo bài viết bình thường).
-* Nếu người dùng muốn bot tự động đăng bài Facebook, up video TikTok thật:
-  * Hướng dẫn họ mở tệp: `~/marketing-ai-system/.env`.
-  * Xem tài liệu hướng dẫn: `03-Marketing-Hub/CONNECTOR_GUIDE.md`.
-  * Điền Token Fanpage, Zoho CRM, hoặc TikTok API.
+* Tiêu chuẩn bàn giao hoàn hảo: **11/11 tiêu chí verify PASS** và **6/6 bài test E2E PASS**.

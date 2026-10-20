@@ -27,7 +27,13 @@ function getAvailableBaseAccounts() {
   if (!fs.existsSync(PROFILES_DIR)) return DEFAULT_BASE_ACCOUNTS;
   try {
     const dirents = fs.readdirSync(PROFILES_DIR, { withFileTypes: true })
-      .filter(dirent => dirent.isDirectory() && !dirent.name.startsWith('.') && !dirent.name.includes('-') && dirent.name !== 'archive' && dirent.name !== 'archive_profiles');
+      .filter(dirent => dirent.isDirectory() && 
+        !dirent.name.startsWith('.') && 
+        !dirent.name.endsWith('-light') && 
+        !dirent.name.endsWith('-heavy') && 
+        !dirent.name.endsWith('-balanced') && 
+        dirent.name !== 'archive' && 
+        dirent.name !== 'archive_profiles');
     
     // Ưu tiên các profile đã đăng nhập (có auth.json)
     const withAuth = dirents

@@ -49,6 +49,9 @@ def test_file_integrity():
         SUITE_ROOT / "01-Community-OS" / "channels_master.json",
         SUITE_ROOT / "01-Community-OS" / "agents_template.json",
         SUITE_ROOT / "01-Community-OS" / "Marketing-OS-Full.team.json",
+        SUITE_ROOT / "01-Community-OS" / "setup_managed_agents.py",
+        SUITE_ROOT / "01-Community-OS" / "unlock_full_permissions.py",
+        SUITE_ROOT / "01-Community-OS" / "broadcast_kind_10100.js",
         SUITE_ROOT / "02-Codex-Rotator" / "codex-rotator.js",
         SUITE_ROOT / "02-Codex-Rotator" / "codex-acp-rotator.js",
         SUITE_ROOT / "02-Codex-Rotator" / "account-manager.js",
@@ -57,6 +60,7 @@ def test_file_integrity():
         SUITE_ROOT / "03-Marketing-Hub" / "test_hub.py",
         SUITE_ROOT / "03-Marketing-Hub" / ".env.example",
         SUITE_ROOT / "03-Marketing-Hub" / "CONNECTOR_GUIDE.md",
+        SUITE_ROOT / "03-Marketing-Hub" / "services" / "linkedin" / "linkedin_cli.js",
         SUITE_ROOT / "04-Buzz-Harnesses" / "install_harnesses.py",
     ]
     missing = [str(f.relative_to(SUITE_ROOT)) for f in required_files if not f.exists()]
@@ -152,7 +156,20 @@ def test_live_nostr_community():
         else:
             buzz_exe = "buzz"
 
-    relay = os.environ.get("BUZZ_RELAY") or os.environ.get("BUZZ_RELAY_URL") or "https://ncthang04.communities.buzz.xyz"
+    # Tự động nhận diện Relay động
+    relay = os.environ.get("BUZZ_RELAY") or os.environ.get("BUZZ_RELAY_URL")
+    if not relay:
+        try:
+            from importlib.machinery import SourceFileLoader
+            setup_mod = SourceFileLoader("setup_managed_agents", str(SUITE_ROOT / "01-Community-OS" / "setup_managed_agents.py")).load_module()
+            detected = setup_mod.detect_community_relay()
+            if detected:
+                if detected.startswith("ws://"): relay = "http://" + detected[5:]
+                elif detected.startswith("wss://"): relay = "https://" + detected[6:]
+        except Exception:
+            pass
+    if not relay:
+        relay = "https://ncthang04.communities.buzz.xyz"
     nsec = os.environ.get("BUZZ_NSEC") or "nsec1f2v3zk9x5erm5cck83e3l9r3fw73rx0yr5p29y7xrsswdmfzj62sr2f3sy"
 
     # Lấy danh sách kênh

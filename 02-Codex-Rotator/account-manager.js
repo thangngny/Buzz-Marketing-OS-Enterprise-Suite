@@ -91,7 +91,13 @@ function listAllProfiles() {
   try {
     if (fs.existsSync(PROFILES_DIR)) {
       existing = fs.readdirSync(PROFILES_DIR, { withFileTypes: true })
-        .filter(d => d.isDirectory() && !d.name.startsWith('.') && !d.name.includes('-') && d.name !== 'archive' && d.name !== 'archive_profiles')
+        .filter(d => d.isDirectory() && 
+          !d.name.startsWith('.') && 
+          !d.name.endsWith('-light') && 
+          !d.name.endsWith('-heavy') && 
+          !d.name.endsWith('-balanced') && 
+          d.name !== 'archive' && 
+          d.name !== 'archive_profiles')
         .map(d => d.name);
     }
   } catch (e) {}

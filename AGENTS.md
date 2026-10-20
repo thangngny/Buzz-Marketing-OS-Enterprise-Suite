@@ -135,6 +135,11 @@ Tiêu chuẩn bàn giao hoàn hảo: **6/6 TESTS PASS**.
 3. **Kích hoạt tài khoản thật (Live Connectors)**:
    - Hướng dẫn cấu hình API nằm tại: `03-Marketing-Hub/CONNECTOR_GUIDE.md`.
 
+4. **Bộ điều phối xuất bản LinkedIn Đa tầng (Multi-Tier Resilient Services)**:
+   - Đóng gói sẵn tại: `03-Marketing-Hub/services/linkedin/` (`linkedin_cli.js`, `linkedin_api.js`, `oauth_server.js`).
+   - Tự động cài đặt vào: `%USERPROFILE%\.buzz\services\linkedin\`.
+   - Cung cấp 3 tầng dự phòng tự hành (Official REST API -> 1-Click Page Repost -> Browser Composer).
+
 ---
 
 ## 5. TẦNG 1: BUZZ COMMUNITY, BUZZ CLI & XỬ LÝ LỖI PHÂN QUYỀN (ACCESS POLICY)
