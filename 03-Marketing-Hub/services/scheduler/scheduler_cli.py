@@ -64,6 +64,8 @@ def parse_schedule_time(time_str: str) -> tuple[float, str]:
 
 def cmd_add(args):
     epoch, iso = parse_schedule_time(args.time)
+    media_url = getattr(args, "media_url", None) or getattr(args, "media", None)
+    media_path = getattr(args, "file_path", None) or getattr(args, "file", None)
     task_id = scheduler_db.add_task(
         channel=args.channel,
         title=args.title or "Bài viết Marketing",
@@ -71,8 +73,8 @@ def cmd_add(args):
         scheduled_epoch=epoch,
         scheduled_iso=iso,
         content_type=args.type or "post",
-        media_url=args.media or args.media_url,
-        media_path=args.file,
+        media_url=media_url,
+        media_path=media_path,
         reply_channel_id=args.channel_id or "Assistant Marketing",
         requester=args.requester or "Chị Lina"
     )
@@ -135,8 +137,8 @@ def main():
     p_add.add_argument("--time", "-t", required=True, help="Thời gian: 11:00, 11h30, +15m, 2026-10-28 11:00")
     p_add.add_argument("--title", help="Tiêu đề bài viết/video")
     p_add.add_argument("--text", "-m", help="Nội dung Caption/Bài viết")
-    p_add.add_argument("--media", "--media-url", help="URL media (Blossom hoặc http)")
-    p_add.add_argument("--file", help="Đường dẫn file media trên máy")
+    p_add.add_argument("--media", "--media-url", dest="media_url", help="URL media (Blossom hoặc http)")
+    p_add.add_argument("--file", "--file-path", dest="file_path", help="Đường dẫn file media trên máy")
     p_add.add_argument("--type", choices=["post", "video", "article"], default="video", help="Loại nội dung")
     p_add.add_argument("--channel-id", help="ID kênh Buzz để gửi thông báo kết quả")
     p_add.add_argument("--requester", default="Chị Lina", help="Người yêu cầu")
