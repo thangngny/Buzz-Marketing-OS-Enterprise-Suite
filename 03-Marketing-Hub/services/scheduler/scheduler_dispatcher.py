@@ -150,17 +150,27 @@ def dispatch_linkedin(task: dict) -> dict:
     raise RuntimeError(f"LinkedIn CLI failed: {proc.stderr.strip() or proc.stdout.strip()}")
 
 def dispatch_youtube(task: dict) -> dict:
+    from marketing_system.config import Settings
+    from marketing_system.constants import Environment
+    from marketing_system.connectors.youtube import YouTubeConnector
+    
     local_media = resolve_media_file(task.get("media_url"), task.get("media_path"))
+    if not local_media or not os.path.isfile(local_media):
+        raise FileNotFoundError(f"Video file required for YouTube publish: {task.get('media_url')}")
+
+    settings = Settings.from_env()
+    settings.environment = Environment.PRODUCTION
+    connector = YouTubeConnector(settings)
     title = task.get("title") or "Minh Van Logistics Video"
-    text = task.get("text") or ""
-    # In YouTube read-only API key state: prepare download and direct link for YouTube Studio
-    return {
-        "channel": "youtube",
-        "status": "staged_ready",
-        "title": title,
-        "video_file": local_media,
-        "note": "Kênh YouTube sẵn sàng. Video đã lưu tại máy và hoàn thiện metadata (Title, Caption). Cần hoàn tất tải qua YouTube Studio do API key đang ở quyền Read-Only."
-    }
+    description = task.get("text") or task.get("description") or ""
+    privacy = task.get("privacy") or "public"
+
+    return connector.upload_video(
+        file_path=local_media,
+        title=title[:100],
+        description=description,
+        privacy=privacy
+    )
 
 def notify_buzz(task: dict, success: bool, result_details: dict = None, error_msg: str = None):
     channel = task.get("reply_channel_id") or "Assistant Marketing"
@@ -171,12 +181,16 @@ def notify_buzz(task: dict, success: bool, result_details: dict = None, error_ms
     python_exe = r"C:\Users\Admin\marketing-ai-system\.venv\Scripts\python.exe"
     
     if success:
+        live_link = ""
+        if result_details:
+            url = result_details.get("video_url") or result_details.get("permalink") or result_details.get("url")
+            if url:
+                live_link = f"\n🌐 **Link xem trực tiếp:** {url}\n"
         msg = f"""🎉 **[HỆ THỐNG XUẤT BẢN TỰ ĐỘNG - HOÀN TẤT]**
 ⏰ **Thời gian thực thi:** {time.strftime('%H:%M:%S %d/%m/%Y')}
 📱 **Kênh xuất bản:** {target_channel}
 📌 **Tiêu đề:** {title}
-✅ **Trạng thái:** Đã đăng thành công theo đúng lịch hẹn của @Lina.
-
+✅ **Trạng thái:** Đã đăng thành công theo đúng lịch hẹn của @Lina.{live_link}
 👉 Bài viết/Video đã chính thức hiển thị trên kênh. Trợ lý tổng hợp báo cáo hoàn thành nhiệm vụ!"""
     else:
         msg = f"""⚠️ **[HỆ THỐNG XUẤT BẢN - CÓ LỖI XẢY RA]**
