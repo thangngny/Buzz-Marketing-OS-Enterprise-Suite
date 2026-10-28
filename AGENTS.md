@@ -22,7 +22,7 @@ Hệ thống **Buzz Marketing OS Full Enterprise** là hệ điều hành Market
 | (Nostr Relay Engine)   |      |     (Load-Balancer & Failover)     |      |  (MCP Tools Server)  |
 +------------------------+      +------------------------------------+      +----------------------+
 | * 28 Phòng ban chuẩn   |      | * Dynamic Multi-Account Pool       |      | * FastMCP Protocol   |
-| * 23 Chuyên gia AI     |      | * Auto-Failover & Cooldown (1h)    |      | * 37 Công cụ tự động |
+| * 25 Chuyên gia AI     |      | * Auto-Failover & Cooldown (1h)    |      | * 37 Công cụ tự động |
 | * Kind 0 Profile       |      | * Tier Routing (Light/Heavy)       |      | * Zoho, Meta, TikTok |
 | * Kind 10100 (Anyone)  |      | * Cấu hình: ~/.codex/profiles/     |      | * Chế độ Mock & Live |
 | * Template & Managed   |      | * Bypass-permissions mode          |      | * Virtualenv Python  |

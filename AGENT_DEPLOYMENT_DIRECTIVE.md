@@ -76,7 +76,7 @@ Script sẽ tự động chạy liên hoàn:
 2. **Tầng 3**: Dựng Marketing Hub MCP, cài đặt môi trường ảo `.venv`, tích hợp dịch vụ xuất bản LinkedIn đa tầng.
 3. **Tầng 4**: Đăng ký các Harness `codex-harness.json` và `marketing-hub.json` vào Buzz Desktop.
 4. **Tầng 1**: 
-   - Đồng bộ 23 Chuyên gia AI vào `managed-agents.json` với chính sách `respond_to: anyone` và `start_on_app_launch: true`.
+   - Đồng bộ 25 Chuyên gia AI (bao gồm Grokbot và Muse) vào `managed-agents.json` với chính sách `respond_to: anyone` và `start_on_app_launch: true`.
    - Mở toàn quyền thực thi `unlock_full_permissions.py` và ký phát sóng Nostr Kind 10100 lên Community Relay.
    - Bơm 28 phòng ban chuẩn vào Relay và đưa 25 bot vào túc trực.
 5. **Nghiệm thu**: Tự động chạy `verify_system.py` (11/11 PASS) và `test_e2e_full.py` (6/6 PASS).

@@ -208,6 +208,22 @@ CANONICAL_AGENTS = [
         "nsec": "nsec1q95lstq2xe3g4yd4nyatetx4e568ay89nj6vwmemm9r8gn9qqr5qf37r7u",
         "role": "Chỉ dẫn điều hướng các phòng ban và quy trình vận hành",
         "parallelism": 5
+    },
+    {
+        "name": "Grokbot",
+        "display_name": "Chuyên Gia Phản Biện & Tin Tức X Real-time (Grokbot)",
+        "pubkey": "1beae49e7e79af7190949e2f24941581dcabc92a8a5bd1522bd98ba8ccef4492",
+        "nsec": "nsec1cga7j0jgtusr5te484p5rkft9nzt4wtfvje6ev32dc7tq826s8csnwst8v",
+        "role": "Phản biện rủi ro, phân tích đối lập và cập nhật tin tức thời gian thực từ nền tảng X",
+        "parallelism": 2
+    },
+    {
+        "name": "Muse",
+        "display_name": "Chuyên Gia Lắng Nghe & Xu Hướng Mạng Xã Hội (Muse)",
+        "pubkey": "551c6b70ce7a213a36cf33d7bca2bb49d0efed944de808fd7ad7b2303dea7834",
+        "nsec": "nsec1cnacsucfryp7d8s34jru6d4t763mgk3xvrn80m63ujg6uvwnv2jqwyhyd3",
+        "role": "Lắng nghe cộng đồng, trích xuất pain points và phát hiện xu hướng nội dung mạng xã hội",
+        "parallelism": 2
     }
 ]
 

@@ -43,6 +43,18 @@ const fallbackProfile = (rotator && typeof rotator.getAvailableBaseAccounts === 
 const chosenProfile = (rotator && rotator.getNextProfile(tier)) || fallbackProfile;
 const profileHome = rotator ? rotator.getProfileHome(chosenProfile) : path.join(USER_HOME, '.codex', 'profiles', chosenProfile);
 
+// Auto-sync fresh auth.json from base account if tier sub-profile is chosen
+try {
+  const chosenBase = (rotator && typeof rotator.getBaseAccount === 'function')
+    ? rotator.getBaseAccount(chosenProfile)
+    : chosenProfile.replace(/-(light|heavy|balanced)$/, '');
+  const baseAuth = path.join(USER_HOME, '.codex', 'profiles', chosenBase, 'auth.json');
+  const targetAuth = path.join(profileHome, 'auth.json');
+  if (baseAuth !== targetAuth && fs.existsSync(baseAuth)) {
+    fs.copyFileSync(baseAuth, targetAuth);
+  }
+} catch (e) {}
+
 const spawnEnv = Object.assign({}, process.env, {
   CODEX_HOME: profileHome,
   BUZZ_PRIVATE_KEY: process.env.BUZZ_PRIVATE_KEY || '',
@@ -148,7 +160,9 @@ function checkQuotaDepleted(text) {
     text.includes('usage_limit_exceeded') ||
     text.includes('workspace_member_credits_depleted') ||
     text.includes('Your workspace is out of credits') ||
-    text.includes('rate_limit_reached_type')
+    text.includes('rate_limit_reached_type') ||
+    (text.includes('"code":-32000') && text.includes('Authentication required')) ||
+    text.includes('handshake transport error http 401')
   );
 }
 

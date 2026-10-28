@@ -23,6 +23,32 @@ function getBaseAccount(profileName) {
   return profileName.replace(/-(light|heavy|balanced)$/, '');
 }
 
+/**
+ * Validates whether auth.json exists and its OAuth access_token is still valid (not expired).
+ */
+function isAuthValid(profileDir) {
+  const authFile = path.join(profileDir, 'auth.json');
+  if (!fs.existsSync(authFile)) return false;
+  try {
+    const data = JSON.parse(fs.readFileSync(authFile, 'utf8'));
+    // If API key is present, it does not use JWT expiration
+    if (data.OPENAI_API_KEY) return true;
+    const token = (data.tokens && data.tokens.access_token) || data.access_token;
+    if (!token) return false;
+    const parts = token.split('.');
+    if (parts.length < 2) return false;
+    const payload = parts[1];
+    const padded = payload + '='.repeat((4 - (payload.length % 4)) % 4);
+    const decoded = JSON.parse(Buffer.from(padded, 'base64').toString('utf8'));
+    const exp = decoded.exp;
+    if (!exp) return true;
+    const nowSec = Math.floor(Date.now() / 1000);
+    return nowSec < exp - 60; // Must have at least 60s remaining
+  } catch (e) {
+    return false;
+  }
+}
+
 function getAvailableBaseAccounts() {
   if (!fs.existsSync(PROFILES_DIR)) return DEFAULT_BASE_ACCOUNTS;
   try {
@@ -35,7 +61,13 @@ function getAvailableBaseAccounts() {
         dirent.name !== 'archive' && 
         dirent.name !== 'archive_profiles');
     
-    // Ưu tiên các profile đã đăng nhập (có auth.json)
+    // Ưu tiên các profile đã đăng nhập VÀ token còn hạn hợp lệ
+    const withValidAuth = dirents
+      .filter(dirent => isAuthValid(path.join(PROFILES_DIR, dirent.name)))
+      .map(dirent => dirent.name);
+    if (withValidAuth.length > 0) return withValidAuth;
+
+    // Fallback: Nếu không có tài khoản hợp lệ, kiểm tra các profile có auth.json bất kỳ
     const withAuth = dirents
       .filter(dirent => fs.existsSync(path.join(PROFILES_DIR, dirent.name, 'auth.json')))
       .map(dirent => dirent.name);
@@ -163,9 +195,18 @@ function getStatus() {
     const inCooldown = state.cooldowns && state.cooldowns[name] && state.cooldowns[name] > now;
     const remainingMin = inCooldown ? Math.ceil((state.cooldowns[name] - now) / 60000) : 0;
     const hasAuth = fs.existsSync(path.join(PROFILES_DIR, name, 'auth.json'));
+    const valid = isAuthValid(path.join(PROFILES_DIR, name));
+    let statusText = 'READY';
+    if (!hasAuth) {
+      statusText = 'CHƯA ĐĂNG NHẬP (NO AUTH)';
+    } else if (!valid) {
+      statusText = 'TOKEN HẾT HẠN (EXPIRED)';
+    } else if (inCooldown) {
+      statusText = `COOLDOWN (${remainingMin}m remaining)`;
+    }
     return {
       account: name,
-      status: !hasAuth ? 'CHƯA ĐĂNG NHẬP (NO AUTH)' : (inCooldown ? `COOLDOWN (${remainingMin}m remaining)` : 'READY'),
+      status: statusText,
       tiers: {
         light: `gpt-5.6-luna [low] -> ${name}-light`,
         balanced: `gpt-5.6-sol [medium] -> ${name}`,
@@ -177,7 +218,7 @@ function getStatus() {
 
 function hasHealthyAccounts() {
   const baseAccounts = getAvailableBaseAccounts();
-  const baseProfiles = baseAccounts.filter(name => fs.existsSync(path.join(PROFILES_DIR, name, 'auth.json')));
+  const baseProfiles = baseAccounts.filter(name => isAuthValid(path.join(PROFILES_DIR, name)));
   if (baseProfiles.length === 0) return false;
   const state = loadState();
   cleanExpiredCooldowns(state);
