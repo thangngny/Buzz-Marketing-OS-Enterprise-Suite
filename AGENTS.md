@@ -140,6 +140,18 @@ Tiêu chuẩn bàn giao hoàn hảo: **6/6 TESTS PASS**.
    - Tự động cài đặt vào: `%USERPROFILE%\.buzz\services\linkedin\`.
    - Cung cấp 3 tầng dự phòng tự hành (Official REST API -> 1-Click Page Repost -> Browser Composer).
 
+5. **Bộ điều phối xuất bản Zalo OA (Video & Article Open API)**:
+   - Đóng gói sẵn tại: `03-Marketing-Hub/services/zalo-oa/` (`oa_api.js`, `oa_cli.js`).
+   - Tự động cài đặt vào: `%USERPROFILE%\.buzz\services\zalo-oa\`.
+   - Hỗ trợ đầy đủ: Đăng bài viết (Article), tải lên video trực tiếp qua quy trình 3 bước chuẩn của Zalo (`preparevideo` ➔ `verify` ➔ `article/create`), xuất bản công khai lên Zalo OA.
+
+6. **Bộ Hẹn Giờ Xuất Bản Tự Động Đa Kênh (Autonomous Multi-Platform Post Scheduler)**:
+   - Đóng gói sẵn tại: `03-Marketing-Hub/services/scheduler/` (`scheduler_db.py`, `scheduler_dispatcher.py`, `scheduler_daemon.py`, `scheduler_cli.py`).
+   - Tự động cài đặt vào: `%USERPROFILE%\.buzz\services\scheduler\`.
+   - Cơ sở dữ liệu SQLite `scheduler.db` chuẩn ACID chống mất dữ liệu khi tắt nguồn hoặc khởi động lại máy tính.
+   - Daemon ngầm tự động quét mỗi 10-15s và kích hoạt đăng bài lên Zalo OA, TikTok, Facebook, LinkedIn, YouTube đúng thời điểm hẹn giờ mà không cần can thiệp thủ công.
+   - Tự động phát sóng thông báo nghiệm thu kèm link bài viết vào kênh Buzz của người yêu cầu.
+
 ---
 
 ## 5. TẦNG 1: BUZZ COMMUNITY, BUZZ CLI & XỬ LÝ LỖI PHÂN QUYỀN (ACCESS POLICY)

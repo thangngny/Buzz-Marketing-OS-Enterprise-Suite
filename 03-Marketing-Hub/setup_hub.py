@@ -97,15 +97,18 @@ def main():
     else:
         print(f"  -> Đã tồn tại file .env: {env_file}")
 
-    # 4.5 Cài đặt LinkedIn Multi-Tier Resilient Services
-    print_step("Cài đặt bộ điều phối xuất bản LinkedIn (Multi-Tier Resilient Services):")
-    bundled_linkedin = Path(__file__).resolve().parent / "services" / "linkedin"
-    user_buzz_linkedin = user_home / ".buzz" / "services" / "linkedin"
-    if bundled_linkedin.exists():
-        user_buzz_linkedin.mkdir(parents=True, exist_ok=True)
-        for item in bundled_linkedin.glob("*.js"):
-            shutil.copy2(item, user_buzz_linkedin / item.name)
-            print(f"  -> Đã cài đặt dịch vụ LinkedIn: {item.name} -> {user_buzz_linkedin / item.name}")
+    # 4.5 Cài đặt LinkedIn, Zalo OA & Scheduler Services
+    print_step("Cài đặt bộ điều phối xuất bản đa kênh (LinkedIn, Zalo OA, Post Scheduler):")
+    services_to_sync = ["linkedin", "zalo-oa", "scheduler"]
+    for sname in services_to_sync:
+        bundled_svc = Path(__file__).resolve().parent / "services" / sname
+        user_buzz_svc = user_home / ".buzz" / "services" / sname
+        if bundled_svc.exists():
+            user_buzz_svc.mkdir(parents=True, exist_ok=True)
+            for item in bundled_svc.glob("*.*"):
+                if item.is_file() and not item.name.endswith(".db"):
+                    shutil.copy2(item, user_buzz_svc / item.name)
+            print(f"  -> Đã cài đặt dịch vụ {sname} -> {user_buzz_svc}")
 
     # 4.6 Tự động liên kết LinkedIn Controller vào catalog.py
     catalog_py = target_repo_dir / "src" / "marketing_system" / "tools" / "catalog.py"

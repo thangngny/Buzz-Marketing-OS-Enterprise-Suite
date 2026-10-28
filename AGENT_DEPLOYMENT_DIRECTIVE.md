@@ -73,7 +73,7 @@ python master_deploy.py --all --community-url "<COMMUNITY_URL>" --nsec "<OWNER_N
 
 Script sẽ tự động chạy liên hoàn:
 1. **Tầng 2**: Cấu hình bộ xoay tài khoản Codex vào `~/.codex` và nạp harness.
-2. **Tầng 3**: Dựng Marketing Hub MCP, cài đặt môi trường ảo `.venv`, tích hợp dịch vụ xuất bản LinkedIn đa tầng.
+2. **Tầng 3**: Dựng Marketing Hub MCP, cài đặt môi trường ảo `.venv`, tích hợp bộ xuất bản đa kênh (LinkedIn, Zalo OA Video Article, Post Scheduler).
 3. **Tầng 4**: Đăng ký các Harness `codex-harness.json` và `marketing-hub.json` vào Buzz Desktop.
 4. **Tầng 1**: 
    - Đồng bộ 25 Chuyên gia AI (bao gồm Grokbot và Muse) vào `managed-agents.json` với chính sách `respond_to: anyone` và `start_on_app_launch: true`.

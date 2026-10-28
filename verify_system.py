@@ -155,6 +155,12 @@ def main():
     print(f" {check_mark(mcp_run_ok)} Khởi động thử nghiệm module MCP Server")
     report.append(("Tầng 3 - Khởi động MCP Server", mcp_run_ok))
 
+    # Test Scheduler
+    scheduler_cli = user_home / ".buzz" / "services" / "scheduler" / "scheduler_cli.py"
+    scheduler_ok = scheduler_cli.exists()
+    print(f" {check_mark(scheduler_ok)} Bộ Hẹn Giờ Xuất Bản (Post Scheduler Engine): {scheduler_cli}")
+    report.append(("Tầng 3 - Post Scheduler Engine", scheduler_ok))
+
     # ----------------- TỔNG KẾT BÁO CÁO -----------------
     print("\n" + "=" * 80)
     print("                       BẢNG TỔNG KẾT ĐÁNH GIÁ SẴN SÀNG")
