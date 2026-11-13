@@ -6,6 +6,7 @@ Replaces the outdated 2026-11-03 snapshot permanently.
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 import time
@@ -14,9 +15,48 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Set, Tuple
 
 CACHE_FILE = Path(r"C:\Users\Admin\.buzz\tools\zoho_live_vat_cache.json")
+LOCK_FILE = Path(r"C:\Users\Admin\.buzz\.scratch\zoho_cache.lock")
 SYS_PATH = r"C:\Users\Admin\marketing-ai-system\src"
 if SYS_PATH not in sys.path:
     sys.path.append(SYS_PATH)
+
+
+class CrossProcessLock:
+    """Inter-process file mutex using msvcrt on Windows to prevent race conditions."""
+    def __init__(self, lock_file: Path = LOCK_FILE, timeout: float = 8.0):
+        self.lock_file = lock_file
+        self.timeout = timeout
+        self.fd = None
+
+    def __enter__(self):
+        self.lock_file.parent.mkdir(parents=True, exist_ok=True)
+        start_time = time.time()
+        while True:
+            try:
+                self.fd = os.open(str(self.lock_file), os.O_CREAT | os.O_EXCL | os.O_RDWR)
+                return self
+            except (FileExistsError, OSError):
+                # Check for stale lock file older than 60s
+                try:
+                    if self.lock_file.exists() and (time.time() - self.lock_file.stat().st_mtime > 60):
+                        self.lock_file.unlink(missing_ok=True)
+                except Exception:
+                    pass
+                if time.time() - start_time >= self.timeout:
+                    # Proceed to avoid deadlock
+                    return self
+                time.sleep(0.05)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.fd is not None:
+            try:
+                os.close(self.fd)
+            except OSError:
+                pass
+            try:
+                self.lock_file.unlink(missing_ok=True)
+            except OSError:
+                pass
 
 
 def norm_digits(value: Any) -> str:
@@ -68,21 +108,22 @@ class ZohoLiveDedupe:
         return cls._instance
 
     def _load(self):
-        if not self.cache_file.exists():
-            self._refresh_from_live()
-            return
+        with CrossProcessLock():
+            if not self.cache_file.exists():
+                self._refresh_from_live()
+                return
 
-        try:
-            data = json.loads(self.cache_file.read_text(encoding="utf-8"))
-            self.last_updated = data.get("updated_at", "")
-            self.vats = set(data.get("vats", []))
-            self.names = set(data.get("names", []))
-            for n in self.names:
-                c = norm_core(n)
-                if len(c) >= 5:
-                    self.cores.add(c)
-        except Exception:
-            self._refresh_from_live()
+            try:
+                data = json.loads(self.cache_file.read_text(encoding="utf-8"))
+                self.last_updated = data.get("updated_at", "")
+                self.vats = set(data.get("vats", []))
+                self.names = set(data.get("names", []))
+                for n in self.names:
+                    c = norm_core(n)
+                    if len(c) >= 5:
+                        self.cores.add(c)
+            except Exception:
+                self._refresh_from_live()
 
     def _get_conn(self):
         if self.conn is None:
@@ -99,24 +140,25 @@ class ZohoLiveDedupe:
 
     def _refresh_from_live(self):
         """Refreshes the full cache from Zoho REST API."""
-        try:
-            import subprocess
-            cmd = [
-                r"C:\Users\Admin\marketing-ai-system\.venv\Scripts\python.exe",
-                r"C:\Users\Admin\.buzz\tools\build_zoho_live_cache.py"
-            ]
-            subprocess.run(cmd, capture_output=True, timeout=60)
-            if self.cache_file.exists():
-                data = json.loads(self.cache_file.read_text(encoding="utf-8"))
-                self.last_updated = data.get("updated_at", "")
-                self.vats = set(data.get("vats", []))
-                self.names = set(data.get("names", []))
-                for n in self.names:
-                    c = norm_core(n)
-                    if len(c) >= 5:
-                        self.cores.add(c)
-        except Exception as e:
-            sys.stderr.write(f"Cache refresh failed: {e}\n")
+        with CrossProcessLock():
+            try:
+                import subprocess
+                cmd = [
+                    r"C:\Users\Admin\marketing-ai-system\.venv\Scripts\python.exe",
+                    r"C:\Users\Admin\.buzz\tools\build_zoho_live_cache.py"
+                ]
+                subprocess.run(cmd, capture_output=True, timeout=60)
+                if self.cache_file.exists():
+                    data = json.loads(self.cache_file.read_text(encoding="utf-8"))
+                    self.last_updated = data.get("updated_at", "")
+                    self.vats = set(data.get("vats", []))
+                    self.names = set(data.get("names", []))
+                    for n in self.names:
+                        c = norm_core(n)
+                        if len(c) >= 5:
+                            self.cores.add(c)
+            except Exception as e:
+                sys.stderr.write(f"Cache refresh failed: {e}\n")
 
     def check(self, vat: str, company_name: str = "") -> Tuple[bool, str]:
         """
