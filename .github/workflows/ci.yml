@@ -1,0 +1,39 @@
+name: Buzz Marketing OS Enterprise Suite - Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-and-verify:
+    name: Syntax & Enterprise Suite Diagnostics
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: ['3.11']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Verify Code Compilation & Integrity
+        run: |
+          python -m compileall .
+
+      - name: Validate JSON Templates
+        run: |
+          python -c "import json, glob; [json.load(open(f, encoding='utf-8')) for f in glob.glob('**/*.json', recursive=True) if not f.endswith('package.json')]"
+
+      - name: Run Diagnostics (Dry-run verification)
+        run: |
+          python verify_system.py
